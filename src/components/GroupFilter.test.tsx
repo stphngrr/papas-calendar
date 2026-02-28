@@ -18,11 +18,27 @@ describe('GroupFilter', () => {
     expect(onToggle).toHaveBeenCalledWith('Family')
   })
 
-  test('adding a new group calls onAddGroup', () => {
+  test('add group form is collapsed by default', () => {
+    render(<GroupFilter groups={[]} enabledGroups={[]} onToggle={() => {}} onAddGroup={() => {}} />)
+    expect(screen.queryByPlaceholderText(/new group/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /add group/i })).toBeInTheDocument()
+  })
+
+  test('clicking Add Group expands form, Cancel collapses it', () => {
+    render(<GroupFilter groups={[]} enabledGroups={[]} onToggle={() => {}} onAddGroup={() => {}} />)
+    fireEvent.click(screen.getByRole('button', { name: /add group/i }))
+    expect(screen.getByPlaceholderText(/new group/i)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
+    expect(screen.queryByPlaceholderText(/new group/i)).not.toBeInTheDocument()
+  })
+
+  test('saving a new group calls onAddGroup and collapses form', () => {
     const onAddGroup = vi.fn()
     render(<GroupFilter groups={['Family']} enabledGroups={['Family']} onToggle={() => {}} onAddGroup={onAddGroup} />)
-    fireEvent.change(screen.getByPlaceholderText(/new group/i), { target: { value: 'Work' } })
     fireEvent.click(screen.getByRole('button', { name: /add group/i }))
+    fireEvent.change(screen.getByPlaceholderText(/new group/i), { target: { value: 'Work' } })
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
     expect(onAddGroup).toHaveBeenCalledWith('Work')
+    expect(screen.queryByPlaceholderText(/new group/i)).not.toBeInTheDocument()
   })
 })

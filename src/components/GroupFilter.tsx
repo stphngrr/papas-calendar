@@ -11,6 +11,7 @@ interface GroupFilterProps {
 }
 
 export function GroupFilter({ groups, enabledGroups, onToggle, onAddGroup }: GroupFilterProps) {
+  const [expanded, setExpanded] = useState(false)
   const [newGroupName, setNewGroupName] = useState('')
 
   return (
@@ -26,20 +27,31 @@ export function GroupFilter({ groups, enabledGroups, onToggle, onAddGroup }: Gro
           {group}
         </label>
       ))}
-      <div className="edit-date-row">
-        <input
-          type="text"
-          placeholder="New group name"
-          value={newGroupName}
-          onChange={(e) => setNewGroupName(e.target.value)}
-        />
-        <button type="button" onClick={() => {
-          const trimmed = newGroupName.trim()
-          if (!trimmed) return
-          onAddGroup(trimmed)
-          setNewGroupName('')
-        }}>Add Group</button>
-      </div>
+      {expanded ? (
+        <div>
+          <input
+            type="text"
+            placeholder="New group name"
+            value={newGroupName}
+            onChange={(e) => setNewGroupName(e.target.value)}
+          />
+          <div className="delete-confirm-buttons">
+            <button type="button" onClick={() => {
+              const trimmed = newGroupName.trim()
+              if (!trimmed) return
+              onAddGroup(trimmed)
+              setNewGroupName('')
+              setExpanded(false)
+            }}>Save</button>
+            <button type="button" onClick={() => {
+              setNewGroupName('')
+              setExpanded(false)
+            }}>Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" onClick={() => setExpanded(true)}>Add Group</button>
+      )}
     </fieldset>
   )
 }
