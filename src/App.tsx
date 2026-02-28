@@ -2,10 +2,69 @@
 // ABOUTME: Composes the control panel and calendar preview into the main layout.
 
 import './App.css'
+import { useCalendarState } from './hooks/useCalendarState'
+import { CsvUpload } from './components/CsvUpload'
+import { EventList } from './components/EventList'
+import { EventForm } from './components/EventForm'
+import { MonthYearSelector } from './components/MonthYearSelector'
+import { GroupFilter } from './components/GroupFilter'
+import { HolidaySettings } from './components/HolidaySettings'
+import { ExportCsvButton } from './components/ExportCsvButton'
+import { CustomTitleInput } from './components/CustomTitleInput'
 
 function App() {
+  const state = useCalendarState()
+
   return (
-    <h1>Papa's Calendar</h1>
+    <div>
+      <h1>Papa's Calendar</h1>
+
+      <CsvUpload
+        onLoad={state.loadEventsFromCsv}
+        eventCount={state.events.length}
+        groupNames={state.availableGroups}
+      />
+
+      <MonthYearSelector
+        month={state.selectedMonth}
+        year={state.selectedYear}
+        onMonthChange={state.setMonth}
+        onYearChange={state.setYear}
+      />
+
+      <CustomTitleInput
+        value={state.customTitle}
+        onChange={state.setCustomTitle}
+      />
+
+      {state.availableGroups.length > 0 && (
+        <GroupFilter
+          groups={state.availableGroups}
+          enabledGroups={state.enabledGroups}
+          onToggle={state.toggleGroup}
+        />
+      )}
+
+      <HolidaySettings
+        enabledHolidays={state.enabledHolidays}
+        customHolidays={state.customHolidays}
+        onToggle={state.toggleHoliday}
+        onAddCustom={state.addCustomHoliday}
+      />
+
+      <EventForm
+        onAdd={state.addEvent}
+        availableGroups={state.availableGroups}
+      />
+
+      <EventList
+        events={state.events}
+        onUpdate={state.updateEvent}
+        onDelete={state.deleteEvent}
+      />
+
+      <ExportCsvButton events={state.events} />
+    </div>
   )
 }
 
