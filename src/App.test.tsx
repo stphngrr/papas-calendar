@@ -50,6 +50,23 @@ test('clicking Events tab shows event form and hides calendar settings', () => {
   expect(screen.queryByRole('heading', { name: /groups/i })).not.toBeInTheDocument()
 })
 
+test('custom title is prepended to month/year', () => {
+  render(<App />)
+  const year = new Date().getFullYear()
+  const month = new Date().getMonth() // 0-indexed
+  const monthNames = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER']
+  const monthYear = `${monthNames[month]} ${year}`
+
+  // Default title is just month/year
+  expect(screen.getByText(monthYear)).toBeInTheDocument()
+
+  // Enter a custom title
+  fireEvent.change(screen.getByLabelText(/title/i), { target: { value: 'Family' } })
+
+  // Title should now be custom + month/year
+  expect(screen.getByText(`FAMILY — ${monthYear}`)).toBeInTheDocument()
+})
+
 test('adding an event shows it in the event list', () => {
   render(<App />)
 

@@ -32,8 +32,10 @@ function App() {
     state.selectedYear, state.selectedMonth,
     state.filteredEvents, holidays, moonPhases,
   )
-  const title = state.customTitle ||
-    `${MONTH_NAMES[state.selectedMonth - 1].toUpperCase()} ${state.selectedYear}`
+  const monthYear = `${MONTH_NAMES[state.selectedMonth - 1].toUpperCase()} ${state.selectedYear}`
+  const title = state.customTitle
+    ? `${state.customTitle.toUpperCase()} — ${monthYear}`
+    : monthYear
 
   return (
     <div className="app">
