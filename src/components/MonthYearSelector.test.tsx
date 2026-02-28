@@ -22,4 +22,31 @@ describe('MonthYearSelector', () => {
     fireEvent.change(screen.getByLabelText(/year/i), { target: { value: '2030' } })
     expect(onYearChange).toHaveBeenCalledWith(2030)
   })
+
+  test('year input has min and max bounds', () => {
+    render(
+      <MonthYearSelector month={1} year={2026} onMonthChange={() => {}} onYearChange={() => {}} />,
+    )
+    const yearInput = screen.getByLabelText(/year/i)
+    expect(yearInput).toHaveAttribute('min', '1900')
+    expect(yearInput).toHaveAttribute('max', '2099')
+  })
+
+  test('clamps year to min bound', () => {
+    const onYearChange = vi.fn()
+    render(
+      <MonthYearSelector month={1} year={2026} onMonthChange={() => {}} onYearChange={onYearChange} />,
+    )
+    fireEvent.change(screen.getByLabelText(/year/i), { target: { value: '1800' } })
+    expect(onYearChange).toHaveBeenCalledWith(1900)
+  })
+
+  test('clamps year to max bound', () => {
+    const onYearChange = vi.fn()
+    render(
+      <MonthYearSelector month={1} year={2026} onMonthChange={() => {}} onYearChange={onYearChange} />,
+    )
+    fireEvent.change(screen.getByLabelText(/year/i), { target: { value: '2200' } })
+    expect(onYearChange).toHaveBeenCalledWith(2099)
+  })
 })

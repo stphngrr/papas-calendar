@@ -28,7 +28,9 @@ export function MonthYearSelector({ month, year, onMonthChange, onYearChange }: 
         <input
           type="number"
           value={year}
-          onChange={(e) => onYearChange(Number(e.target.value))}
+          min={1900}
+          max={2099}
+          onChange={(e) => onYearChange(Math.max(1900, Math.min(2099, Number(e.target.value))))}
         />
       </label>
     </div>
