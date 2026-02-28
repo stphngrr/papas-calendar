@@ -7,7 +7,7 @@
 - ~~Allow event groups to be edited in the UI~~
 - ~~Allow a new group to be added in the UI~~
 - Verify events in initial-events.csv are correct against example files
-- Side pane is busy and events list can get very long — consider moving to another view
+- ~~Side pane is busy and events list can get very long — consider moving to another view~~
 - Support filtering events list by group, month, and event type (in addition to existing name search)
 
 ## From code audit
