@@ -3,6 +3,7 @@
 
 import { describe, test, expect } from 'vitest'
 import { buildCalendarGrid } from './calendar'
+import type { CalendarEvent, Holiday, MoonPhase } from '../types'
 
 describe('buildCalendarGrid', () => {
   test('February 2026 starts on Sunday, has 28 days, needs 4 rows', () => {
@@ -52,5 +53,28 @@ describe('buildCalendarGrid', () => {
     for (let col = 1; col < 7; col++) {
       expect(grid.weeks[5][col]).toBeNull()
     }
+  })
+
+  test('events are placed in the correct day cells', () => {
+    const events: CalendarEvent[] = [
+      { id: '1', name: 'Amy Holland', type: 'B', month: 2, day: 4, groups: ['Lewis'] },
+      { id: '2', name: 'Sam Jones', type: 'A', month: 2, day: 28, groups: ['Lewis'] },
+    ]
+
+    const grid = buildCalendarGrid(2026, 2, events, [], [])
+
+    // Feb 4 2026 is Wednesday (row 0, col 3)
+    const feb4 = grid.weeks[0][3]
+    expect(feb4).not.toBeNull()
+    expect(feb4!.day).toBe(4)
+    expect(feb4!.events).toHaveLength(1)
+    expect(feb4!.events[0].name).toBe('Amy Holland')
+
+    // Feb 28 2026 is Saturday (row 3, col 6)
+    const feb28 = grid.weeks[3][6]
+    expect(feb28).not.toBeNull()
+    expect(feb28!.day).toBe(28)
+    expect(feb28!.events).toHaveLength(1)
+    expect(feb28!.events[0].name).toBe('Sam Jones')
   })
 })
