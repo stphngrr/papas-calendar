@@ -8,6 +8,10 @@ export interface PdfOptions {
   title: string
 }
 
+export function downloadCalendarPdf(doc: jsPDF, filename: string): void {
+  doc.save(filename)
+}
+
 // Layout constants (landscape letter, mm)
 const PAGE_WIDTH = 279.4
 const PAGE_HEIGHT = 215.9
