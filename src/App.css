@@ -286,6 +286,13 @@ form button[type="submit"]:hover {
   width: 50px;
 }
 
+.group-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .delete-confirm-buttons {
   display: flex;
   gap: 6px;
