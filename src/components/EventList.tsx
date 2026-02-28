@@ -83,10 +83,13 @@ export function EventList({ events, onUpdate, onDelete }: EventListProps) {
                 <span> ({event.type}) {event.month}/{event.day}</span>
                 <button onClick={() => startEdit(event)}>Edit</button>
                 {confirmDeleteId === event.id ? (
-                  <>
-                    <button onClick={() => { onDelete(event.id); setConfirmDeleteId(null) }}>Confirm</button>
-                    <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
-                  </>
+                  <div className="delete-confirm">
+                    <p className="form-error">Are you sure you want to delete?</p>
+                    <div className="delete-confirm-buttons">
+                      <button onClick={() => { onDelete(event.id); setConfirmDeleteId(null) }}>Confirm</button>
+                      <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
+                    </div>
+                  </div>
                 ) : (
                   <button onClick={() => setConfirmDeleteId(event.id)}>Delete</button>
                 )}

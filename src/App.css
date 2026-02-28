@@ -286,6 +286,11 @@ form button[type="submit"]:hover {
   width: 50px;
 }
 
+.delete-confirm-buttons {
+  display: flex;
+  gap: 6px;
+}
+
 /* Responsive — stack on narrow screens */
 @media (max-width: 768px) {
   .app-layout {

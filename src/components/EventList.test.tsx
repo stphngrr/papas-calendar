@@ -27,6 +27,8 @@ describe('EventList', () => {
 
     // Should not delete yet
     expect(onDelete).not.toHaveBeenCalled()
+    // Should show warning message
+    expect(screen.getByText(/are you sure you want to delete/i)).toBeInTheDocument()
     // Should show confirm/cancel
     fireEvent.click(screen.getByRole('button', { name: /confirm/i }))
     expect(onDelete).toHaveBeenCalledWith('1')
