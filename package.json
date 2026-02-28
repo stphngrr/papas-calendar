@@ -11,6 +11,9 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "jspdf": "^4.2.0",
+    "lune": "^0.4.0",
+    "papaparse": "^5.5.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -20,6 +23,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.10.1",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
