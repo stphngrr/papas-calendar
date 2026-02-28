@@ -51,6 +51,19 @@ describe('EventForm', () => {
     expect(screen.queryByLabelText(/name/i)).not.toBeInTheDocument()
   })
 
+  test('does not submit when name is empty', () => {
+    const onAdd = vi.fn()
+    render(<EventForm onAdd={onAdd} availableGroups={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+
+    // Leave name empty and try to submit
+    fireEvent.click(screen.getByRole('button', { name: /save event/i }))
+
+    expect(onAdd).not.toHaveBeenCalled()
+    // Form should stay open
+    expect(screen.getByLabelText(/name/i)).toBeInTheDocument()
+  })
+
   test('shows existing groups as checkboxes', () => {
     render(<EventForm onAdd={() => {}} availableGroups={['Family', 'Friends', 'Work']} />)
     fireEvent.click(screen.getByRole('button', { name: /add event/i }))

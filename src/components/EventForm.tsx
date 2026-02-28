@@ -29,6 +29,7 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
+      if (!name.trim()) return
       onAdd({ name, type, month, day, groups: selectedGroups })
       resetForm()
     },
