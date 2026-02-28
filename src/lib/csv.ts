@@ -46,6 +46,30 @@ export function parseEventsFromCsv(csvString: string): CalendarEvent[] {
   return events
 }
 
+export function exportEventsToCsv(events: CalendarEvent[]): string {
+  const rows = events.map((e) => ({
+    Name: e.name,
+    Type: e.type,
+    Month: e.month,
+    Day: e.day,
+    Groups: e.groups.join(','),
+  }))
+
+  return Papa.unparse(rows, {
+    columns: ['Name', 'Type', 'Month', 'Day', 'Groups'],
+  })
+}
+
+export function downloadCsv(csvString: string, filename: string): void {
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 function isValidType(type: string): type is EventType {
   return type === 'B' || type === 'A'
 }

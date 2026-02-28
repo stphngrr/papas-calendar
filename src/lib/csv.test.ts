@@ -2,7 +2,8 @@
 // ABOUTME: Covers PapaParse integration, multi-group handling, deduplication, and round-tripping.
 
 import { describe, expect, it } from 'vitest'
-import { parseEventsFromCsv } from './csv'
+import { exportEventsToCsv, parseEventsFromCsv } from './csv'
+import type { CalendarEvent } from '../types'
 
 describe('parseEventsFromCsv', () => {
   it('parses a single birthday row', () => {
@@ -88,5 +89,48 @@ Valid Person,B,6,15,Lewis`
 
     expect(events).toHaveLength(1)
     expect(events[0].name).toBe('Valid Person')
+  })
+})
+
+describe('exportEventsToCsv', () => {
+  it('exports a single event to CSV', () => {
+    const events: CalendarEvent[] = [
+      { id: '1', name: 'Amy Holland', type: 'B', month: 2, day: 4, groups: ['Lewis'] },
+    ]
+
+    const csv = exportEventsToCsv(events)
+
+    expect(csv).toContain('Name,Type,Month,Day,Groups')
+    expect(csv).toContain('Amy Holland,B,2,4,Lewis')
+  })
+
+  it('quotes groups when there are multiple', () => {
+    const events: CalendarEvent[] = [
+      { id: '1', name: 'Sam Jones', type: 'A', month: 2, day: 19, groups: ['Lewis', 'Hooper'] },
+    ]
+
+    const csv = exportEventsToCsv(events)
+
+    expect(csv).toContain('"Lewis,Hooper"')
+  })
+
+  it('round-trips: parse then export produces equivalent CSV', () => {
+    const original = `Name,Type,Month,Day,Groups
+Amy Holland,B,2,4,Lewis
+Sam Jones,A,2,19,"Lewis,Hooper"
+Tootsie P,B,2,16,Lewis`
+
+    const events = parseEventsFromCsv(original)
+    const exported = exportEventsToCsv(events)
+    const reparsed = parseEventsFromCsv(exported)
+
+    expect(reparsed).toHaveLength(events.length)
+    for (let i = 0; i < events.length; i++) {
+      expect(reparsed[i].name).toBe(events[i].name)
+      expect(reparsed[i].type).toBe(events[i].type)
+      expect(reparsed[i].month).toBe(events[i].month)
+      expect(reparsed[i].day).toBe(events[i].day)
+      expect(reparsed[i].groups).toEqual(events[i].groups)
+    }
   })
 })
