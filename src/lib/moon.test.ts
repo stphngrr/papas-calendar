@@ -26,4 +26,33 @@ describe('getMoonPhases', () => {
     expect(lastQtr).toBeDefined()
     expect(lastQtr!.day).toBe(9)
   })
+
+  it('returns moon phases for December 2025', () => {
+    const phases = getMoonPhases(2025, 12)
+
+    // Dec 2025 should have all four phase types
+    expect(phases).toHaveLength(4)
+    phases.forEach((phase) => {
+      expect(phase.month).toBe(12)
+      expect(phase.day).toBeGreaterThanOrEqual(1)
+      expect(phase.day).toBeLessThanOrEqual(31)
+    })
+
+    // Cross-check against example PDF
+    const fullMoon = phases.find((p) => p.type === 'Full Moon')
+    expect(fullMoon).toBeDefined()
+    expect(fullMoon!.day).toBe(4)
+
+    const lastQtr = phases.find((p) => p.type === 'Last Qtr')
+    expect(lastQtr).toBeDefined()
+    expect(lastQtr!.day).toBe(11)
+
+    const newMoon = phases.find((p) => p.type === 'New Moon')
+    expect(newMoon).toBeDefined()
+    expect(newMoon!.day).toBe(20)
+
+    const firstQtr = phases.find((p) => p.type === 'First Qtr')
+    expect(firstQtr).toBeDefined()
+    expect(firstQtr!.day).toBe(27)
+  })
 })
