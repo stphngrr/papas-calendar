@@ -4,6 +4,7 @@
 import { useState, useCallback } from 'react'
 import type { CalendarEvent } from '../types'
 import { MONTH_NAMES } from '../constants'
+import { isValidDay } from '../lib/validation'
 
 interface EventListProps {
   events: CalendarEvent[]
@@ -22,6 +23,7 @@ export function EventList({ events, onUpdate, onDelete, availableGroups }: Event
   const [editMonth, setEditMonth] = useState(1)
   const [editDay, setEditDay] = useState(1)
   const [editGroups, setEditGroups] = useState<string[]>([])
+  const [editError, setEditError] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   const startEdit = useCallback((event: CalendarEvent) => {
@@ -34,6 +36,10 @@ export function EventList({ events, onUpdate, onDelete, availableGroups }: Event
 
   const saveEdit = useCallback(() => {
     if (editingId) {
+      if (!isValidDay(editMonth, editDay)) {
+        setEditError('Invalid day for the selected month')
+        return
+      }
       onUpdate(editingId, { name: editName, month: editMonth, day: editDay, groups: editGroups })
       setEditingId(null)
     }
@@ -86,7 +92,7 @@ export function EventList({ events, onUpdate, onDelete, availableGroups }: Event
                   <select
                     className="edit-month-select"
                     value={editMonth}
-                    onChange={(e) => setEditMonth(Number(e.target.value))}
+                    onChange={(e) => { setEditMonth(Number(e.target.value)); if (editError) setEditError('') }}
                     aria-label="Month"
                   >
                     {MONTH_NAMES.map((name, i) => (
@@ -97,10 +103,13 @@ export function EventList({ events, onUpdate, onDelete, availableGroups }: Event
                     className="edit-day-input"
                     type="number"
                     value={editDay}
-                    onChange={(e) => setEditDay(Number(e.target.value))}
+                    onChange={(e) => { setEditDay(Number(e.target.value)); if (editError) setEditError('') }}
                     aria-label="Day"
+                    min={1}
+                    max={31}
                   />
                 </div>
+                {editError && <p className="form-error">{editError}</p>}
                 {availableGroups.length > 0 && (
                   <fieldset>
                     <legend>Groups</legend>

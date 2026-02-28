@@ -149,6 +149,48 @@ describe('EventList', () => {
     expect(screen.getByText('Alice')).toBeInTheDocument()
   })
 
+  test('rejects invalid day on save and shows error', () => {
+    const onUpdate = vi.fn()
+    render(<EventList events={events} onUpdate={onUpdate} onDelete={() => {}} availableGroups={groups} />)
+    fireEvent.click(screen.getAllByRole('button', { name: /edit/i })[0])
+
+    // Set day to 32 (invalid for any month)
+    fireEvent.change(screen.getByLabelText('Day'), { target: { value: '32' } })
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(onUpdate).not.toHaveBeenCalled()
+    expect(screen.getByText(/invalid day/i)).toBeInTheDocument()
+  })
+
+  test('rejects Feb 30 on save', () => {
+    const onUpdate = vi.fn()
+    render(<EventList events={events} onUpdate={onUpdate} onDelete={() => {}} availableGroups={groups} />)
+    fireEvent.click(screen.getAllByRole('button', { name: /edit/i })[0])
+
+    // Change month to February, day to 30
+    fireEvent.change(screen.getByLabelText('Month'), { target: { value: '2' } })
+    fireEvent.change(screen.getByLabelText('Day'), { target: { value: '30' } })
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(onUpdate).not.toHaveBeenCalled()
+    expect(screen.getByText(/invalid day/i)).toBeInTheDocument()
+  })
+
+  test('clears edit error when day or month changes', () => {
+    const onUpdate = vi.fn()
+    render(<EventList events={events} onUpdate={onUpdate} onDelete={() => {}} availableGroups={groups} />)
+    fireEvent.click(screen.getAllByRole('button', { name: /edit/i })[0])
+
+    // Trigger error
+    fireEvent.change(screen.getByLabelText('Day'), { target: { value: '32' } })
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+    expect(screen.getByText(/invalid day/i)).toBeInTheDocument()
+
+    // Changing day clears error
+    fireEvent.change(screen.getByLabelText('Day'), { target: { value: '15' } })
+    expect(screen.queryByText(/invalid day/i)).not.toBeInTheDocument()
+  })
+
   test('group filter shows only events in the selected group', () => {
     render(<EventList events={events} onUpdate={() => {}} onDelete={() => {}} availableGroups={groups} />)
     const groupSelect = screen.getByDisplayValue('All Groups')
