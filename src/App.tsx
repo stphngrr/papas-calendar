@@ -11,9 +11,30 @@ import { GroupFilter } from './components/GroupFilter'
 import { HolidaySettings } from './components/HolidaySettings'
 import { ExportCsvButton } from './components/ExportCsvButton'
 import { CustomTitleInput } from './components/CustomTitleInput'
+import { CalendarPreview } from './components/CalendarPreview'
+import { buildCalendarGrid } from './lib/calendar'
+import { getHolidaysForMonth } from './lib/holidays'
+import { getMoonPhases } from './lib/moon'
+
+const MONTH_NAMES = [
+  'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
+]
 
 function App() {
   const state = useCalendarState()
+
+  const holidays = getHolidaysForMonth(
+    state.selectedYear, state.selectedMonth,
+    state.enabledHolidays, state.customHolidays,
+  )
+  const moonPhases = getMoonPhases(state.selectedYear, state.selectedMonth)
+  const grid = buildCalendarGrid(
+    state.selectedYear, state.selectedMonth,
+    state.filteredEvents, holidays, moonPhases,
+  )
+  const title = state.customTitle ||
+    `${MONTH_NAMES[state.selectedMonth - 1]} ${state.selectedYear}`
 
   return (
     <div>
@@ -64,6 +85,8 @@ function App() {
       />
 
       <ExportCsvButton events={state.events} />
+
+      <CalendarPreview grid={grid} title={title} />
     </div>
   )
 }
