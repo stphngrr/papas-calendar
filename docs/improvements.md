@@ -1,9 +1,9 @@
 # Improvements
 
 - Downloaded PDF always has 6 rows even when the month only needs 4 or 5
-- Collapse Add Event pane when not in use
-- Don't allow event to be added without a name
-- Show months as names in dropdowns instead of numbers
+- ~~Collapse Add Event pane when not in use~~
+- ~~Don't allow event to be added without a name~~
+- ~~Show months as names in dropdowns instead of numbers~~
 - Allow event groups to be edited in the UI
 - Allow a new group to be added in the UI
 - Verify events in initial-events.csv are correct against example files
@@ -13,7 +13,7 @@
 ## From code audit
 
 ### Bugs
-- Events with empty groups are invisible — `filteredEvents` uses `.some()` on groups array, which returns false for empty arrays
+- ~~Events with empty groups are invisible — `filteredEvents` uses `.some()` on groups array, which returns false for empty arrays~~
 
 ### Validation
 - No error handling on CSV file read failures
@@ -27,7 +27,7 @@
 - Page title in index.html is still "papas-calendar-scaffold"
 
 ### Code quality
-- Month name arrays are duplicated in three files — extract to a shared constant
+- ~~Month name arrays are duplicated in three files — extract to a shared constant~~
 - Passover/Hanukkah lookup tables only cover through 2030
 
 ### Build
