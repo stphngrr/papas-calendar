@@ -30,11 +30,11 @@ test('renders Calendar and Events tabs, Calendar is default', () => {
   expect(screen.getByRole('button', { name: 'Events' })).toBeInTheDocument()
 
   // Calendar tab content should be visible by default
-  expect(screen.getByText(/import \/ export/i)).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: /groups/i })).toBeInTheDocument()
 
   // Events tab content should NOT be visible
   expect(screen.queryByRole('heading', { name: /add event/i })).not.toBeInTheDocument()
+  expect(screen.queryByText(/import \/ export/i)).not.toBeInTheDocument()
 })
 
 test('clicking Events tab shows event form and hides calendar settings', () => {
@@ -44,9 +44,10 @@ test('clicking Events tab shows event form and hides calendar settings', () => {
 
   // Events content visible
   expect(screen.getByRole('heading', { name: /add event/i })).toBeInTheDocument()
+  expect(screen.getByText(/import \/ export/i)).toBeInTheDocument()
 
   // Calendar content hidden
-  expect(screen.queryByText(/import \/ export/i)).not.toBeInTheDocument()
+  expect(screen.queryByRole('heading', { name: /groups/i })).not.toBeInTheDocument()
 })
 
 test('adding an event shows it in the event list', () => {

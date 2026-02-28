@@ -61,19 +61,6 @@ function App() {
           {activeTab === 'calendar' && (
             <>
               <section className="panel-section">
-                <h2 className="section-label">Import / Export</h2>
-                <CsvUpload
-                  onLoad={state.loadEventsFromCsv}
-                  eventCount={state.events.length}
-                  groupNames={state.availableGroups}
-                />
-                <div className="button-row">
-                  <ExportCsvButton events={state.events} />
-                  <DownloadPdfButton grid={grid} title={title} />
-                </div>
-              </section>
-
-              <section className="panel-section">
                 <h2 className="section-label">Calendar</h2>
                 <MonthYearSelector
                   month={state.selectedMonth}
@@ -85,6 +72,9 @@ function App() {
                   value={state.customTitle}
                   onChange={state.setCustomTitle}
                 />
+                <div className="button-row">
+                  <DownloadPdfButton grid={grid} title={title} />
+                </div>
               </section>
 
               <section className="panel-section">
@@ -112,6 +102,18 @@ function App() {
 
           {activeTab === 'events' && (
             <>
+              <section className="panel-section">
+                <h2 className="section-label">Import / Export</h2>
+                <CsvUpload
+                  onLoad={state.loadEventsFromCsv}
+                  eventCount={state.events.length}
+                  groupNames={state.availableGroups}
+                />
+                <div className="button-row">
+                  <ExportCsvButton events={state.events} />
+                </div>
+              </section>
+
               <section className="panel-section">
                 <h2 className="section-label">Add Event</h2>
                 <EventForm
