@@ -18,6 +18,7 @@ export function useCalendarState() {
   const [customHolidays, setCustomHolidays] = useState<Holiday[]>([])
   const [customTitle, setCustomTitleState] = useState('')
   const [customGroups, setCustomGroups] = useState<string[]>([])
+  const [csvErrors, setCsvErrors] = useState<string[]>([])
 
   const availableGroups = useMemo(() => {
     const groups = new Set<string>()
@@ -42,8 +43,9 @@ export function useCalendarState() {
   }, [events, selectedMonth, enabledGroups])
 
   const loadEventsFromCsv = useCallback((csvString: string) => {
-    const parsed = parseEventsFromCsv(csvString)
+    const { events: parsed, errors } = parseEventsFromCsv(csvString)
     setEvents(parsed)
+    setCsvErrors(errors)
     const groups = new Set<string>()
     for (const e of parsed) {
       for (const g of e.groups) {
@@ -127,6 +129,7 @@ export function useCalendarState() {
 
   return {
     events,
+    csvErrors,
     selectedMonth,
     selectedYear,
     enabledGroups,

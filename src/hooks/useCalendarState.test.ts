@@ -30,6 +30,32 @@ describe('useCalendarState', () => {
     expect(result.current.enabledGroups).toContain('Friends')
   })
 
+  test('loadEventsFromCsv exposes csvErrors from parsing', () => {
+    const { result } = renderHook(() => useCalendarState())
+    const csv = `Name,Type,Month,Day,Groups
+,B,2,4,Lewis
+Valid Person,B,6,15,Family`
+    act(() => result.current.loadEventsFromCsv(csv))
+    expect(result.current.events).toHaveLength(1)
+    expect(result.current.csvErrors).toEqual(['Row 2: missing name'])
+  })
+
+  test('csvErrors clears on successful load', () => {
+    const { result } = renderHook(() => useCalendarState())
+    // First load with errors
+    act(() => result.current.loadEventsFromCsv(`Name,Type,Month,Day,Groups
+,B,2,4,Lewis`))
+    expect(result.current.csvErrors).toHaveLength(1)
+    // Second load with no errors
+    act(() => result.current.loadEventsFromCsv(CSV_TWO_GROUPS))
+    expect(result.current.csvErrors).toEqual([])
+  })
+
+  test('csvErrors is empty initially', () => {
+    const { result } = renderHook(() => useCalendarState())
+    expect(result.current.csvErrors).toEqual([])
+  })
+
   test('addEvent adds an event with a generated id', () => {
     const { result } = renderHook(() => useCalendarState())
     act(() => result.current.addEvent({
