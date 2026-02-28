@@ -44,4 +44,51 @@ describe('HolidaySettings', () => {
     fireEvent.click(screen.getByRole('button', { name: /add holiday/i }))
     expect(onAddCustom).toHaveBeenCalledWith({ name: 'PIZZA DAY', month: 2, day: 9 })
   })
+
+  test('rejects duplicate of existing custom holiday', () => {
+    const onAddCustom = vi.fn()
+    renderAndExpand({
+      onAddCustom,
+      customHolidays: [{ name: 'PIZZA DAY', month: 2, day: 9 }],
+    })
+    fireEvent.change(screen.getByLabelText(/holiday name/i), { target: { value: 'PIZZA DAY' } })
+    fireEvent.change(screen.getByLabelText(/holiday month/i), { target: { value: '3' } })
+    fireEvent.change(screen.getByLabelText(/holiday day/i), { target: { value: '1' } })
+    fireEvent.click(screen.getByRole('button', { name: /add holiday/i }))
+    expect(onAddCustom).not.toHaveBeenCalled()
+    expect(screen.getByText(/already exists/i)).toBeInTheDocument()
+  })
+
+  test('rejects duplicate of built-in holiday', () => {
+    const onAddCustom = vi.fn()
+    renderAndExpand({ onAddCustom })
+    fireEvent.change(screen.getByLabelText(/holiday name/i), { target: { value: 'Christmas Day' } })
+    fireEvent.click(screen.getByRole('button', { name: /add holiday/i }))
+    expect(onAddCustom).not.toHaveBeenCalled()
+    expect(screen.getByText(/already exists/i)).toBeInTheDocument()
+  })
+
+  test('duplicate check is case-insensitive', () => {
+    const onAddCustom = vi.fn()
+    renderAndExpand({
+      onAddCustom,
+      customHolidays: [{ name: 'PIZZA DAY', month: 2, day: 9 }],
+    })
+    fireEvent.change(screen.getByLabelText(/holiday name/i), { target: { value: 'pizza day' } })
+    fireEvent.click(screen.getByRole('button', { name: /add holiday/i }))
+    expect(onAddCustom).not.toHaveBeenCalled()
+  })
+
+  test('clears duplicate error when name changes', () => {
+    const onAddCustom = vi.fn()
+    renderAndExpand({
+      onAddCustom,
+      customHolidays: [{ name: 'PIZZA DAY', month: 2, day: 9 }],
+    })
+    fireEvent.change(screen.getByLabelText(/holiday name/i), { target: { value: 'PIZZA DAY' } })
+    fireEvent.click(screen.getByRole('button', { name: /add holiday/i }))
+    expect(screen.getByText(/already exists/i)).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/holiday name/i), { target: { value: 'TACO DAY' } })
+    expect(screen.queryByText(/already exists/i)).not.toBeInTheDocument()
+  })
 })

@@ -22,17 +22,32 @@ export function HolidaySettings({
   const [customName, setCustomName] = useState('')
   const [customMonth, setCustomMonth] = useState(1)
   const [customDay, setCustomDay] = useState(1)
+  const [duplicateError, setDuplicateError] = useState('')
+
+  const handleNameChange = useCallback((value: string) => {
+    setCustomName(value)
+    setDuplicateError('')
+  }, [])
 
   const handleAddCustom = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      if (!customName.trim()) return
-      onAddCustom({ name: customName.trim(), month: customMonth, day: customDay })
+      const trimmed = customName.trim()
+      if (!trimmed) return
+      const nameUpper = trimmed.toUpperCase()
+      const isDuplicate =
+        customHolidays.some((h) => h.name.toUpperCase() === nameUpper) ||
+        HOLIDAY_DEFINITIONS.some((d) => d.name.toUpperCase() === nameUpper)
+      if (isDuplicate) {
+        setDuplicateError(`"${trimmed}" already exists`)
+        return
+      }
+      onAddCustom({ name: trimmed, month: customMonth, day: customDay })
       setCustomName('')
       setCustomMonth(1)
       setCustomDay(1)
     },
-    [customName, customMonth, customDay, onAddCustom],
+    [customName, customMonth, customDay, onAddCustom, customHolidays],
   )
 
   return (
@@ -68,7 +83,7 @@ export function HolidaySettings({
           <form onSubmit={handleAddCustom}>
             <label>
               Holiday name
-              <input type="text" value={customName} onChange={(e) => setCustomName(e.target.value)} />
+              <input type="text" value={customName} onChange={(e) => handleNameChange(e.target.value)} />
             </label>
             <label>
               Holiday month
@@ -78,6 +93,7 @@ export function HolidaySettings({
               Holiday day
               <input type="number" min={1} max={31} value={customDay} onChange={(e) => setCustomDay(Number(e.target.value))} />
             </label>
+            {duplicateError && <div role="alert">{duplicateError}</div>}
             <button type="submit">Add Holiday</button>
           </form>
         </div>

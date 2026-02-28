@@ -19,7 +19,7 @@
 - ~~No error handling on CSV file read failures~~
 - ~~EventList inline edit accepts invalid month/day values~~
 - ~~Year input has no min/max bounds~~
-- No duplicate check when adding custom holidays
+- ~~No duplicate check when adding custom holidays~~
 
 ### UX
 - No way to delete custom holidays once added
