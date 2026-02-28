@@ -11,6 +11,7 @@ export function parseEventsFromCsv(csvString: string): CalendarEvent[] {
   })
 
   const events: CalendarEvent[] = []
+  const seen = new Set<string>()
 
   for (const row of result.data) {
     const name = (row.Name ?? '').trim()
@@ -21,6 +22,16 @@ export function parseEventsFromCsv(csvString: string): CalendarEvent[] {
     const groups = groupsRaw
       ? groupsRaw.split(',').map((g) => g.trim()).filter(Boolean)
       : []
+
+    if (!name || !isValidType(type) || !isValidMonth(month) || !isValidDay(day)) {
+      continue
+    }
+
+    const dedupKey = `${name.toLowerCase()}|${type}|${month}|${day}`
+    if (seen.has(dedupKey)) {
+      continue
+    }
+    seen.add(dedupKey)
 
     events.push({
       id: crypto.randomUUID(),
@@ -33,4 +44,16 @@ export function parseEventsFromCsv(csvString: string): CalendarEvent[] {
   }
 
   return events
+}
+
+function isValidType(type: string): type is EventType {
+  return type === 'B' || type === 'A'
+}
+
+function isValidMonth(month: number): boolean {
+  return Number.isInteger(month) && month >= 1 && month <= 12
+}
+
+function isValidDay(day: number): boolean {
+  return Number.isInteger(day) && day >= 1 && day <= 31
 }
