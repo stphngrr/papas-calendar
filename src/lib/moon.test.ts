@@ -55,4 +55,17 @@ describe('getMoonPhases', () => {
     expect(firstQtr).toBeDefined()
     expect(firstQtr!.day).toBe(27)
   })
+
+  it('returns an array for any valid month', () => {
+    // Every real month should return phases, but verify the function
+    // always returns an array and never throws
+    for (let m = 1; m <= 12; m++) {
+      const phases = getMoonPhases(2025, m)
+      expect(Array.isArray(phases)).toBe(true)
+      expect(phases.length).toBeGreaterThanOrEqual(1)
+      phases.forEach((phase) => {
+        expect(phase.month).toBe(m)
+      })
+    }
+  })
 })
