@@ -93,21 +93,4 @@ describe('EventForm', () => {
     expect(screen.getByLabelText('Work')).toBeInTheDocument()
   })
 
-  test('new group can be added via text input', () => {
-    const onAdd = vi.fn()
-    render(<EventForm onAdd={onAdd} availableGroups={['Family']} />)
-    fireEvent.click(screen.getByRole('button', { name: /add event/i }))
-
-    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Dan' } })
-    fireEvent.change(screen.getByPlaceholderText(/new group/i), { target: { value: 'Work' } })
-    fireEvent.click(screen.getByRole('button', { name: /add group/i }))
-
-    // New group should appear as a checked checkbox
-    expect(screen.getByLabelText('Work')).toBeChecked()
-
-    fireEvent.click(screen.getByRole('button', { name: /save event/i }))
-    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({
-      groups: ['Work'],
-    }))
-  })
 })

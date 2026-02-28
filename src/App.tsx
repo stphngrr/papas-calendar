@@ -68,16 +68,15 @@ function App() {
             />
           </section>
 
-          {state.availableGroups.length > 0 && (
-            <section className="panel-section">
-              <h2 className="section-label">Groups</h2>
-              <GroupFilter
-                groups={state.availableGroups}
-                enabledGroups={state.enabledGroups}
-                onToggle={state.toggleGroup}
-              />
-            </section>
-          )}
+          <section className="panel-section">
+            <h2 className="section-label">Groups</h2>
+            <GroupFilter
+              groups={state.availableGroups}
+              enabledGroups={state.enabledGroups}
+              onToggle={state.toggleGroup}
+              onAddGroup={state.addGroup}
+            />
+          </section>
 
           <section className="panel-section">
             <HolidaySettings

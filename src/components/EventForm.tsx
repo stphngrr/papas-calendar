@@ -18,8 +18,6 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
   const [day, setDay] = useState(1)
   const [selectedGroups, setSelectedGroups] = useState<string[]>([])
   const [error, setError] = useState('')
-  const [newGroupName, setNewGroupName] = useState('')
-  const [addedGroups, setAddedGroups] = useState<string[]>([])
 
   const resetForm = useCallback(() => {
     setName('')
@@ -28,8 +26,6 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
     setDay(1)
     setSelectedGroups([])
     setError('')
-    setNewGroupName('')
-    setAddedGroups([])
     setExpanded(false)
   }, [])
 
@@ -89,36 +85,21 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
         Day
         <input type="number" min={1} max={31} value={day} onChange={(e) => setDay(Number(e.target.value))} />
       </label>
-      <fieldset>
-        <legend>Groups</legend>
-        {[...availableGroups, ...addedGroups.filter((g) => !availableGroups.includes(g))].map((group) => (
-          <label key={group}>
-            <input
-              type="checkbox"
-              checked={selectedGroups.includes(group)}
-              onChange={() => toggleGroup(group)}
-            />
-            {group}
-          </label>
-        ))}
-        <div className="edit-date-row">
-          <input
-            type="text"
-            placeholder="New group name"
-            value={newGroupName}
-            onChange={(e) => setNewGroupName(e.target.value)}
-          />
-          <button type="button" onClick={() => {
-            const trimmed = newGroupName.trim()
-            if (!trimmed) return
-            if (!addedGroups.includes(trimmed) && !availableGroups.includes(trimmed)) {
-              setAddedGroups((prev) => [...prev, trimmed])
-            }
-            setSelectedGroups((prev) => prev.includes(trimmed) ? prev : [...prev, trimmed])
-            setNewGroupName('')
-          }}>Add Group</button>
-        </div>
-      </fieldset>
+      {availableGroups.length > 0 && (
+        <fieldset>
+          <legend>Groups</legend>
+          {availableGroups.map((group) => (
+            <label key={group}>
+              <input
+                type="checkbox"
+                checked={selectedGroups.includes(group)}
+                onChange={() => toggleGroup(group)}
+              />
+              {group}
+            </label>
+          ))}
+        </fieldset>
+      )}
       <button type="submit">Save Event</button>
       <button type="button" onClick={resetForm}>Cancel</button>
     </form>

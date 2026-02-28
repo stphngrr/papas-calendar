@@ -125,6 +125,13 @@ describe('useCalendarState', () => {
     expect(result.current.filteredEvents[0].name).toBe('Ungrouped')
   })
 
+  test('addGroup adds to availableGroups and enabledGroups', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.addGroup('Work'))
+    expect(result.current.availableGroups).toContain('Work')
+    expect(result.current.enabledGroups).toContain('Work')
+  })
+
   test('setCustomTitle updates the custom title', () => {
     const { result } = renderHook(() => useCalendarState())
     act(() => result.current.setCustomTitle('My Calendar'))

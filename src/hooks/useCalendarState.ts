@@ -17,6 +17,7 @@ export function useCalendarState() {
   )
   const [customHolidays, setCustomHolidays] = useState<Holiday[]>([])
   const [customTitle, setCustomTitleState] = useState('')
+  const [customGroups, setCustomGroups] = useState<string[]>([])
 
   const availableGroups = useMemo(() => {
     const groups = new Set<string>()
@@ -25,8 +26,11 @@ export function useCalendarState() {
         groups.add(g)
       }
     }
+    for (const g of customGroups) {
+      groups.add(g)
+    }
     return Array.from(groups).sort()
-  }, [events])
+  }, [events, customGroups])
 
   const filteredEvents = useMemo(() => {
     const enabledSet = new Set(enabledGroups)
@@ -94,6 +98,11 @@ export function useCalendarState() {
     setCustomHolidays((prev) => [...prev, holiday])
   }, [])
 
+  const addGroup = useCallback((group: string) => {
+    setCustomGroups((prev) => prev.includes(group) ? prev : [...prev, group])
+    setEnabledGroups((prev) => prev.includes(group) ? prev : [...prev, group])
+  }, [])
+
   const setCustomTitle = useCallback((title: string) => {
     setCustomTitleState(title)
   }, [])
@@ -114,6 +123,7 @@ export function useCalendarState() {
     deleteEvent,
     setMonth,
     setYear,
+    addGroup,
     toggleGroup,
     toggleHoliday,
     addCustomHoliday,
