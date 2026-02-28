@@ -36,6 +36,38 @@
   overflow: auto;
 }
 
+/* Tab bar */
+.tab-bar {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #ddd;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 0.95em;
+  font-weight: 600;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  background: none;
+  color: #888;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tab-button:hover:not(.active) {
+  color: #555;
+}
+
+.tab-button.active {
+  color: #333;
+  border-bottom-color: #2a6db5;
+}
+
 /* Panel sections */
 .panel-section {
   margin-bottom: 20px;
