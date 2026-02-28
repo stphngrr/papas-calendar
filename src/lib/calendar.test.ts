@@ -77,4 +77,33 @@ describe('buildCalendarGrid', () => {
     expect(feb28!.events).toHaveLength(1)
     expect(feb28!.events[0].name).toBe('Sam Jones')
   })
+
+  test('events on nonexistent dates go into overflowEvents', () => {
+    const events: CalendarEvent[] = [
+      { id: '1', name: 'Matt & Elizabeth Kern', type: 'A', month: 2, day: 29, groups: ['Lewis'] },
+      { id: '2', name: 'Amy Holland', type: 'B', month: 2, day: 4, groups: ['Lewis'] },
+    ]
+
+    // 2026 is not a leap year — Feb has 28 days
+    const grid = buildCalendarGrid(2026, 2, events, [], [])
+
+    expect(grid.overflowEvents).toHaveLength(1)
+    expect(grid.overflowEvents[0].name).toBe('Matt & Elizabeth Kern')
+
+    // The Feb 29 event should NOT appear in any cell
+    for (const week of grid.weeks) {
+      for (const cell of week) {
+        if (cell) {
+          for (const event of cell.events) {
+            expect(event.day).not.toBe(29)
+          }
+        }
+      }
+    }
+
+    // The Feb 4 event should still be in the grid
+    const feb4 = grid.weeks[0][3]
+    expect(feb4!.events).toHaveLength(1)
+    expect(feb4!.events[0].name).toBe('Amy Holland')
+  })
 })
