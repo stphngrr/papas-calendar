@@ -8,7 +8,7 @@
 - ~~Allow a new group to be added in the UI~~
 - Verify events in initial-events.csv are correct against example files
 - ~~Side pane is busy and events list can get very long — consider moving to another view~~
-- Support filtering events list by group, month, and event type (in addition to existing name search)
+- ~~Support filtering events list by group, month, and event type (in addition to existing name search)~~
 
 ## From code audit
 
@@ -24,7 +24,7 @@
 ### UX
 - No way to delete custom holidays once added
 - No feedback when CSV uploads with zero valid events
-- Page title in index.html is still "papas-calendar-scaffold"
+- ~~Page title in index.html is still "papas-calendar-scaffold"~~
 
 ### Code quality
 - ~~Month name arrays are duplicated in three files — extract to a shared constant~~
