@@ -106,4 +106,28 @@ describe('buildCalendarGrid', () => {
     expect(feb4!.events).toHaveLength(1)
     expect(feb4!.events[0].name).toBe('Amy Holland')
   })
+
+  test('events on Feb 29 are NOT overflow in a leap year', () => {
+    const events: CalendarEvent[] = [
+      { id: '1', name: 'Matt & Elizabeth Kern', type: 'A', month: 2, day: 29, groups: ['Lewis'] },
+    ]
+
+    // 2028 is a leap year — Feb has 29 days
+    const grid = buildCalendarGrid(2028, 2, events, [], [])
+
+    expect(grid.overflowEvents).toHaveLength(0)
+
+    // Find the cell with day 29 and verify the event is there
+    let found = false
+    for (const week of grid.weeks) {
+      for (const cell of week) {
+        if (cell && cell.day === 29) {
+          expect(cell.events).toHaveLength(1)
+          expect(cell.events[0].name).toBe('Matt & Elizabeth Kern')
+          found = true
+        }
+      }
+    }
+    expect(found).toBe(true)
+  })
 })
