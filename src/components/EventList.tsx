@@ -50,7 +50,7 @@ export function EventList({ events, onUpdate, onDelete, availableGroups }: Event
       />
       <div className="event-list-scroll">
         {filtered.map((event) => (
-          <div key={event.id}>
+          <div key={event.id} className={event.groups.length === 0 ? 'ungrouped' : ''}>
             {editingId === event.id ? (
               <>
                 <input

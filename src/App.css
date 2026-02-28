@@ -286,6 +286,11 @@ form button[type="submit"]:hover {
   width: 50px;
 }
 
+.ungrouped {
+  background: #fff3cd;
+  border-left: 3px solid #d4a017;
+}
+
 .group-row {
   display: flex;
   align-items: center;

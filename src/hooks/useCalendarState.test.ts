@@ -115,14 +115,13 @@ describe('useCalendarState', () => {
     expect(result.current.customHolidays[0].name).toBe('PIZZA DAY')
   })
 
-  test('filteredEvents includes events with empty groups', () => {
+  test('filteredEvents excludes events with empty groups', () => {
     const { result } = renderHook(() => useCalendarState())
     act(() => result.current.addEvent({
       name: 'Ungrouped', type: 'B', month: 5, day: 1, groups: [],
     }))
     act(() => result.current.setMonth(5))
-    expect(result.current.filteredEvents).toHaveLength(1)
-    expect(result.current.filteredEvents[0].name).toBe('Ungrouped')
+    expect(result.current.filteredEvents).toHaveLength(0)
   })
 
   test('addGroup adds to availableGroups and enabledGroups', () => {

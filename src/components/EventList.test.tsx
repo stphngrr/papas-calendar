@@ -92,6 +92,18 @@ describe('EventList', () => {
     }))
   })
 
+  test('events with no groups are highlighted with a warning class', () => {
+    const ungroupedEvents: CalendarEvent[] = [
+      { id: '1', name: 'Alice', type: 'B', month: 3, day: 15, groups: ['Family'] },
+      { id: '2', name: 'Bob', type: 'A', month: 3, day: 20, groups: [] },
+    ]
+    render(<EventList events={ungroupedEvents} onUpdate={() => {}} onDelete={() => {}} availableGroups={groups} />)
+    const bobRow = screen.getByText('Bob').closest('div')!
+    expect(bobRow.className).toContain('ungrouped')
+    const aliceRow = screen.getByText('Alice').closest('div')!
+    expect(aliceRow.className).not.toContain('ungrouped')
+  })
+
   test('search box filters visible events by name', () => {
     render(<EventList events={events} onUpdate={() => {}} onDelete={() => {}} availableGroups={groups} />)
     const searchBox = screen.getByPlaceholderText(/search/i)
