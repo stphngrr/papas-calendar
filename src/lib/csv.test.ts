@@ -19,4 +19,14 @@ Amy Holland,B,2,4,Lewis`
     expect(events[0].groups).toEqual(['Lewis'])
     expect(events[0].id).toBeDefined()
   })
+
+  it('parses multiple groups in quoted field', () => {
+    const csv = `Name,Type,Month,Day,Groups
+Sam Jones,A,2,19,"Lewis,Hooper"`
+
+    const events = parseEventsFromCsv(csv)
+
+    expect(events).toHaveLength(1)
+    expect(events[0].groups).toEqual(['Lewis', 'Hooper'])
+  })
 })
