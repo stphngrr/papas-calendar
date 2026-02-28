@@ -4,29 +4,65 @@
 import Papa from 'papaparse'
 import type { CalendarEvent, EventType } from '../types'
 
-export function parseEventsFromCsv(csvString: string): CalendarEvent[] {
+export interface CsvParseResult {
+  events: CalendarEvent[]
+  errors: string[]
+}
+
+const REQUIRED_HEADERS = ['Name', 'Type', 'Month', 'Day']
+
+export function parseEventsFromCsv(csvString: string): CsvParseResult {
   const result = Papa.parse<Record<string, string>>(csvString, {
     header: true,
     skipEmptyLines: true,
   })
 
+  const headers = result.meta.fields ?? []
+  const missingHeaders = REQUIRED_HEADERS.filter((h) => !headers.includes(h))
+  if (missingHeaders.length > 0) {
+    return {
+      events: [],
+      errors: [`Missing required columns: ${missingHeaders.join(', ')}`],
+    }
+  }
+
   const events: CalendarEvent[] = []
+  const errors: string[] = []
   const seen = new Set<string>()
 
-  for (const row of result.data) {
+  for (let i = 0; i < result.data.length; i++) {
+    const row = result.data[i]
+    const rowNum = i + 2 // +1 for 0-index, +1 for header row
+
     const name = (row.Name ?? '').trim()
-    const type = (row.Type ?? '').trim().toUpperCase() as EventType
-    const month = parseInt(row.Month, 10)
-    const day = parseInt(row.Day, 10)
+    const rawType = (row.Type ?? '').trim().toUpperCase()
+    const rawMonth = (row.Month ?? '').trim()
+    const rawDay = (row.Day ?? '').trim()
+    const month = parseInt(rawMonth, 10)
+    const day = parseInt(rawDay, 10)
     const groupsRaw = (row.Groups ?? '').trim()
     const groups = groupsRaw
       ? groupsRaw.split(',').map((g) => g.trim()).filter(Boolean)
       : []
 
-    if (!name || !isValidType(type) || !isValidMonth(month) || !isValidDay(day)) {
+    if (!name) {
+      errors.push(`Row ${rowNum}: missing name`)
+      continue
+    }
+    if (!isValidType(rawType)) {
+      errors.push(`Row ${rowNum}: invalid type "${rawType}" (expected B or A)`)
+      continue
+    }
+    if (!isValidMonth(month)) {
+      errors.push(`Row ${rowNum}: invalid month "${rawMonth}"`)
+      continue
+    }
+    if (!isValidDay(day)) {
+      errors.push(`Row ${rowNum}: invalid day "${rawDay}"`)
       continue
     }
 
+    const type = rawType as EventType
     const dedupKey = `${name.toLowerCase()}|${type}|${month}|${day}`
     if (seen.has(dedupKey)) {
       const existing = events.find(
@@ -53,7 +89,7 @@ export function parseEventsFromCsv(csvString: string): CalendarEvent[] {
     })
   }
 
-  return events
+  return { events, errors }
 }
 
 export function exportEventsToCsv(events: CalendarEvent[]): string {
