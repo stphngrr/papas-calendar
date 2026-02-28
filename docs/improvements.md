@@ -1,6 +1,6 @@
 # Improvements
 
-- Downloaded PDF always has 6 rows even when the month only needs 4 or 5
+- ~~Downloaded PDF always has 6 rows even when the month only needs 4 or 5~~
 - ~~Collapse Add Event pane when not in use~~
 - ~~Don't allow event to be added without a name~~
 - ~~Show months as names in dropdowns instead of numbers~~

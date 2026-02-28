@@ -63,6 +63,10 @@ The PDF is drawn programmatically with jsPDF (not screenshotted from HTML). The 
 - Text is not auto-clipped — must measure and scale/truncate manually
 - All state (font, color, line width) is sticky until changed
 
+## Improvements Tracking
+
+`docs/improvements.md` tracks planned work. When completing an item from this list, always mark it as done (wrap in `~~strikethrough~~`).
+
 ## Deployment
 
 GitHub Pages via GitHub Actions. The `base` in `vite.config.ts` must match the repo name. Push to `main` triggers build + deploy.
