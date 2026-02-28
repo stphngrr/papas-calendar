@@ -123,7 +123,7 @@ export function generateCalendarPdf(grid: CalendarGrid, options: PdfOptions): js
   const reserved = new Set(overflowCells.map(c => `${c.row},${c.col}`))
   const titleRegion = findTitleRegion(paddedWeeks, reserved)
 
-  drawGrid(doc, bodyRows, rowHeight)
+  drawGrid(doc, bodyRows, rowHeight, titleRegion)
   drawHeaderRow(doc)
   drawDayCells(doc, paddedWeeks, rowHeight)
   drawOverflowEvents(doc, overflowCells, grid.overflowEvents, rowHeight)
@@ -132,7 +132,12 @@ export function generateCalendarPdf(grid: CalendarGrid, options: PdfOptions): js
   return doc
 }
 
-function drawGrid(doc: jsPDF, bodyRows: number, rowHeight: number): void {
+function drawGrid(
+  doc: jsPDF,
+  bodyRows: number,
+  rowHeight: number,
+  titleRegion: TitleRegion,
+): void {
   doc.setDrawColor(0)
   doc.setLineWidth(0.3)
 
@@ -143,16 +148,36 @@ function drawGrid(doc: jsPDF, bodyRows: number, rowHeight: number): void {
   const headerBottom = MARGIN + HEADER_ROW_HEIGHT
   doc.line(MARGIN, headerBottom, MARGIN + GRID_WIDTH, headerBottom)
 
-  // Body row lines
+  // Title region bounds in page coordinates
+  const titleY1 = headerBottom + titleRegion.startRow * rowHeight
+  const titleY2 = headerBottom + (titleRegion.endRow + 1) * rowHeight
+  const titleX1 = MARGIN + titleRegion.startCol * COL_WIDTH
+  const titleX2 = MARGIN + (titleRegion.endCol + 1) * COL_WIDTH
+
+  // Body row lines — skip segments inside title region
   for (let row = 1; row < bodyRows; row++) {
     const y = headerBottom + row * rowHeight
-    doc.line(MARGIN, y, MARGIN + GRID_WIDTH, y)
+    const insideTitle = y > titleY1 && y < titleY2
+    if (insideTitle) {
+      // Draw left and right segments, skipping the title region
+      if (titleX1 > MARGIN) doc.line(MARGIN, y, titleX1, y)
+      if (titleX2 < MARGIN + GRID_WIDTH) doc.line(titleX2, y, MARGIN + GRID_WIDTH, y)
+    } else {
+      doc.line(MARGIN, y, MARGIN + GRID_WIDTH, y)
+    }
   }
 
-  // Column lines
+  // Column lines — skip segments inside title region
   for (let col = 1; col < COLS; col++) {
     const x = MARGIN + col * COL_WIDTH
-    doc.line(x, MARGIN, x, MARGIN + GRID_HEIGHT)
+    const insideTitle = x > titleX1 && x < titleX2
+    if (insideTitle) {
+      // Draw above and below segments, skipping the title region
+      if (titleY1 > MARGIN) doc.line(x, MARGIN, x, titleY1)
+      if (titleY2 < MARGIN + GRID_HEIGHT) doc.line(x, titleY2, x, MARGIN + GRID_HEIGHT)
+    } else {
+      doc.line(x, MARGIN, x, MARGIN + GRID_HEIGHT)
+    }
   }
 }
 
