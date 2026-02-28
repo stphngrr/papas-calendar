@@ -103,6 +103,24 @@ export function useCalendarState() {
     setEnabledGroups((prev) => prev.includes(group) ? prev : [...prev, group])
   }, [])
 
+  const renameGroup = useCallback((oldName: string, newName: string) => {
+    setEvents((prev) => prev.map((e) => ({
+      ...e,
+      groups: e.groups.map((g) => g === oldName ? newName : g),
+    })))
+    setCustomGroups((prev) => prev.map((g) => g === oldName ? newName : g))
+    setEnabledGroups((prev) => prev.map((g) => g === oldName ? newName : g))
+  }, [])
+
+  const deleteGroup = useCallback((name: string) => {
+    setEvents((prev) => prev.map((e) => ({
+      ...e,
+      groups: e.groups.filter((g) => g !== name),
+    })))
+    setCustomGroups((prev) => prev.filter((g) => g !== name))
+    setEnabledGroups((prev) => prev.filter((g) => g !== name))
+  }, [])
+
   const setCustomTitle = useCallback((title: string) => {
     setCustomTitleState(title)
   }, [])
@@ -124,6 +142,8 @@ export function useCalendarState() {
     setMonth,
     setYear,
     addGroup,
+    renameGroup,
+    deleteGroup,
     toggleGroup,
     toggleHoliday,
     addCustomHoliday,

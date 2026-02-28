@@ -132,6 +132,40 @@ describe('useCalendarState', () => {
     expect(result.current.enabledGroups).toContain('Work')
   })
 
+  test('renameGroup updates group name across all events and state', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.loadEventsFromCsv(CSV_TWO_GROUPS))
+    act(() => result.current.renameGroup('Family', 'Relatives'))
+    // All events that had Family should now have Relatives
+    const aliceGroups = result.current.events.find((e) => e.name === 'Alice')!.groups
+    expect(aliceGroups).toContain('Relatives')
+    expect(aliceGroups).not.toContain('Family')
+    // Carol had both Family and Friends
+    const carolGroups = result.current.events.find((e) => e.name === 'Carol')!.groups
+    expect(carolGroups).toContain('Relatives')
+    expect(carolGroups).toContain('Friends')
+    // enabledGroups and availableGroups should reflect the rename
+    expect(result.current.availableGroups).toContain('Relatives')
+    expect(result.current.availableGroups).not.toContain('Family')
+    expect(result.current.enabledGroups).toContain('Relatives')
+    expect(result.current.enabledGroups).not.toContain('Family')
+  })
+
+  test('deleteGroup removes group from all events and state', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.loadEventsFromCsv(CSV_TWO_GROUPS))
+    act(() => result.current.deleteGroup('Family'))
+    // Alice only had Family — should now have empty groups
+    const aliceGroups = result.current.events.find((e) => e.name === 'Alice')!.groups
+    expect(aliceGroups).toEqual([])
+    // Carol had Family and Friends — should only have Friends
+    const carolGroups = result.current.events.find((e) => e.name === 'Carol')!.groups
+    expect(carolGroups).toEqual(['Friends'])
+    // Family should be gone from available and enabled groups
+    expect(result.current.availableGroups).not.toContain('Family')
+    expect(result.current.enabledGroups).not.toContain('Family')
+  })
+
   test('setCustomTitle updates the custom title', () => {
     const { result } = renderHook(() => useCalendarState())
     act(() => result.current.setCustomTitle('My Calendar'))

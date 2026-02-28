@@ -75,6 +75,8 @@ function App() {
               enabledGroups={state.enabledGroups}
               onToggle={state.toggleGroup}
               onAddGroup={state.addGroup}
+              onRenameGroup={state.renameGroup}
+              onDeleteGroup={state.deleteGroup}
             />
           </section>
 
