@@ -25,9 +25,10 @@ test('changing month updates the preview', () => {
 test('adding an event shows it in the event list', () => {
   render(<App />)
 
-  // Add an event manually via the form
-  fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Test Person' } })
+  // Expand the event form, fill it in, and submit
   fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+  fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Test Person' } })
+  fireEvent.click(screen.getByRole('button', { name: /save event/i }))
 
   // Event should appear in the event list
   expect(screen.getByText('Test Person')).toBeInTheDocument()

@@ -1,5 +1,5 @@
 // ABOUTME: Form for adding new calendar events with name, type, date, and groups.
-// ABOUTME: Displays existing groups as checkboxes for easy assignment.
+// ABOUTME: Starts collapsed; expands on click, collapses after submission or cancel.
 
 import { useState, useCallback } from 'react'
 import type { CalendarEvent, EventType } from '../types'
@@ -10,23 +10,29 @@ interface EventFormProps {
 }
 
 export function EventForm({ onAdd, availableGroups }: EventFormProps) {
+  const [expanded, setExpanded] = useState(false)
   const [name, setName] = useState('')
   const [type, setType] = useState<EventType>('B')
   const [month, setMonth] = useState(1)
   const [day, setDay] = useState(1)
   const [selectedGroups, setSelectedGroups] = useState<string[]>([])
 
+  const resetForm = useCallback(() => {
+    setName('')
+    setType('B')
+    setMonth(1)
+    setDay(1)
+    setSelectedGroups([])
+    setExpanded(false)
+  }, [])
+
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
       onAdd({ name, type, month, day, groups: selectedGroups })
-      setName('')
-      setType('B')
-      setMonth(1)
-      setDay(1)
-      setSelectedGroups([])
+      resetForm()
     },
-    [name, type, month, day, selectedGroups, onAdd],
+    [name, type, month, day, selectedGroups, onAdd, resetForm],
   )
 
   const toggleGroup = useCallback((group: string) => {
@@ -36,6 +42,10 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
         : [...prev, group],
     )
   }, [])
+
+  if (!expanded) {
+    return <button onClick={() => setExpanded(true)}>Add Event</button>
+  }
 
   return (
     <form onSubmit={handleSubmit}>
@@ -73,7 +83,8 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
           ))}
         </fieldset>
       )}
-      <button type="submit">Add Event</button>
+      <button type="submit">Save Event</button>
+      <button type="button" onClick={resetForm}>Cancel</button>
     </form>
   )
 }
