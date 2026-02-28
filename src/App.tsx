@@ -97,6 +97,7 @@ function App() {
                   customHolidays={state.customHolidays}
                   onToggle={state.toggleHoliday}
                   onAddCustom={state.addCustomHoliday}
+                  onRemoveCustom={state.removeCustomHoliday}
                 />
               </section>
             </>

@@ -100,6 +100,10 @@ export function useCalendarState() {
     setCustomHolidays((prev) => [...prev, holiday])
   }, [])
 
+  const removeCustomHoliday = useCallback((name: string) => {
+    setCustomHolidays((prev) => prev.filter((h) => h.name !== name))
+  }, [])
+
   const addGroup = useCallback((group: string) => {
     setCustomGroups((prev) => prev.includes(group) ? prev : [...prev, group])
     setEnabledGroups((prev) => prev.includes(group) ? prev : [...prev, group])
@@ -150,6 +154,7 @@ export function useCalendarState() {
     toggleGroup,
     toggleHoliday,
     addCustomHoliday,
+    removeCustomHoliday,
     setCustomTitle,
   }
 }

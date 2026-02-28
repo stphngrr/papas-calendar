@@ -196,4 +196,14 @@ Valid Person,B,6,15,Family`
     act(() => result.current.setCustomTitle('My Calendar'))
     expect(result.current.customTitle).toBe('My Calendar')
   })
+
+  test('removeCustomHoliday removes a custom holiday by name', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.addCustomHoliday({ name: 'PIZZA DAY', month: 2, day: 9 }))
+    act(() => result.current.addCustomHoliday({ name: 'TACO DAY', month: 10, day: 4 }))
+    expect(result.current.customHolidays).toHaveLength(2)
+    act(() => result.current.removeCustomHoliday('PIZZA DAY'))
+    expect(result.current.customHolidays).toHaveLength(1)
+    expect(result.current.customHolidays[0].name).toBe('TACO DAY')
+  })
 })

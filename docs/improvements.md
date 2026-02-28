@@ -22,7 +22,7 @@
 - ~~No duplicate check when adding custom holidays~~
 
 ### UX
-- No way to delete custom holidays once added
+- ~~No way to delete custom holidays once added~~
 - ~~No feedback when CSV uploads with zero valid events~~
 - ~~Page title in index.html is still "papas-calendar-scaffold"~~
 

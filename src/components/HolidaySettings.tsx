@@ -10,6 +10,7 @@ interface HolidaySettingsProps {
   customHolidays: Holiday[]
   onToggle: (name: string) => void
   onAddCustom: (holiday: Holiday) => void
+  onRemoveCustom: (name: string) => void
 }
 
 export function HolidaySettings({
@@ -17,6 +18,7 @@ export function HolidaySettings({
   customHolidays,
   onToggle,
   onAddCustom,
+  onRemoveCustom,
 }: HolidaySettingsProps) {
   const [expanded, setExpanded] = useState(false)
   const [customName, setCustomName] = useState('')
@@ -76,6 +78,7 @@ export function HolidaySettings({
               {customHolidays.map((h, i) => (
                 <div key={i}>
                   {h.name} — {h.month}/{h.day}
+                  <button onClick={() => onRemoveCustom(h.name)}>Delete</button>
                 </div>
               ))}
             </div>

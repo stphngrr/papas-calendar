@@ -15,6 +15,7 @@ describe('HolidaySettings', () => {
         customHolidays={[]}
         onToggle={() => {}}
         onAddCustom={() => {}}
+        onRemoveCustom={() => {}}
         {...props}
       />,
     )
@@ -77,6 +78,21 @@ describe('HolidaySettings', () => {
     fireEvent.change(screen.getByLabelText(/holiday name/i), { target: { value: 'pizza day' } })
     fireEvent.click(screen.getByRole('button', { name: /add holiday/i }))
     expect(onAddCustom).not.toHaveBeenCalled()
+  })
+
+  test('delete button calls onRemoveCustom with holiday name', () => {
+    const onRemoveCustom = vi.fn()
+    renderAndExpand({
+      onRemoveCustom,
+      customHolidays: [
+        { name: 'PIZZA DAY', month: 2, day: 9 },
+        { name: 'TACO DAY', month: 10, day: 4 },
+      ],
+    })
+    const deleteButtons = screen.getAllByRole('button', { name: /delete/i })
+    expect(deleteButtons).toHaveLength(2)
+    fireEvent.click(deleteButtons[0])
+    expect(onRemoveCustom).toHaveBeenCalledWith('PIZZA DAY')
   })
 
   test('clears duplicate error when name changes', () => {
