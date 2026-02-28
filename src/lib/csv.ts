@@ -15,7 +15,7 @@ export function parseEventsFromCsv(csvString: string): CalendarEvent[] {
 
   for (const row of result.data) {
     const name = (row.Name ?? '').trim()
-    const type = (row.Type ?? '').trim() as EventType
+    const type = (row.Type ?? '').trim().toUpperCase() as EventType
     const month = parseInt(row.Month, 10)
     const day = parseInt(row.Day, 10)
     const groupsRaw = (row.Groups ?? '').trim()
@@ -29,6 +29,16 @@ export function parseEventsFromCsv(csvString: string): CalendarEvent[] {
 
     const dedupKey = `${name.toLowerCase()}|${type}|${month}|${day}`
     if (seen.has(dedupKey)) {
+      const existing = events.find(
+        (e) => `${e.name.toLowerCase()}|${e.type}|${e.month}|${e.day}` === dedupKey
+      )!
+      const existingGroups = new Set(existing.groups)
+      for (const g of groups) {
+        if (!existingGroups.has(g)) {
+          existing.groups.push(g)
+          existingGroups.add(g)
+        }
+      }
       continue
     }
     seen.add(dedupKey)

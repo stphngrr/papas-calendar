@@ -78,6 +78,40 @@ Amy Holland,B,2,4,Lewis`
     expect(events).toHaveLength(1)
   })
 
+  it('merges groups when duplicate events have different groups', () => {
+    const csv = `Name,Type,Month,Day,Groups
+Amy Holland,B,2,4,Lewis
+Amy Holland,B,2,4,Hooper`
+
+    const events = parseEventsFromCsv(csv)
+
+    expect(events).toHaveLength(1)
+    expect(events[0].groups).toEqual(['Lewis', 'Hooper'])
+  })
+
+  it('does not duplicate groups when merging', () => {
+    const csv = `Name,Type,Month,Day,Groups
+Amy Holland,B,2,4,Lewis
+Amy Holland,B,2,4,"Lewis,Hooper"`
+
+    const events = parseEventsFromCsv(csv)
+
+    expect(events).toHaveLength(1)
+    expect(events[0].groups).toEqual(['Lewis', 'Hooper'])
+  })
+
+  it('accepts lowercase event types', () => {
+    const csv = `Name,Type,Month,Day,Groups
+Amy Holland,b,2,4,Lewis
+Sam Jones,a,6,15,Hooper`
+
+    const events = parseEventsFromCsv(csv)
+
+    expect(events).toHaveLength(2)
+    expect(events[0].type).toBe('B')
+    expect(events[1].type).toBe('A')
+  })
+
   it('skips rows with invalid data', () => {
     const csv = `Name,Type,Month,Day,Groups
 ,B,2,4,Lewis
