@@ -17,7 +17,7 @@
 
 ### Validation
 - No error handling on CSV file read failures
-- EventList inline edit accepts invalid month/day values
+- ~~EventList inline edit accepts invalid month/day values~~
 - Year input has no min/max bounds
 - No duplicate check when adding custom holidays
 
