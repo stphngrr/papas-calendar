@@ -46,6 +46,47 @@ export function padGridToSixRows(weeks: (CalendarDay | null)[][]): (CalendarDay 
   return padded
 }
 
+export interface TitleRegion {
+  startRow: number
+  startCol: number
+  endRow: number
+  endCol: number
+}
+
+export function findTitleRegion(paddedWeeks: (CalendarDay | null)[][]): TitleRegion {
+  // Find the largest rectangular area of null cells
+  let best: TitleRegion = { startRow: 0, startCol: 0, endRow: 0, endCol: 0 }
+  let bestArea = 0
+
+  for (let r1 = 0; r1 < BODY_ROWS; r1++) {
+    for (let c1 = 0; c1 < COLS; c1++) {
+      if (paddedWeeks[r1][c1] !== null) continue
+
+      // Try all rectangles starting at (r1, c1)
+      for (let r2 = r1; r2 < BODY_ROWS; r2++) {
+        // Find the max column extent for this row range
+        let maxCol = COLS - 1
+        for (let r = r1; r <= r2; r++) {
+          let colLimit = c1
+          while (colLimit <= maxCol && paddedWeeks[r][colLimit] === null) {
+            colLimit++
+          }
+          maxCol = colLimit - 1
+        }
+        if (maxCol < c1) break
+
+        const area = (r2 - r1 + 1) * (maxCol - c1 + 1)
+        if (area > bestArea) {
+          bestArea = area
+          best = { startRow: r1, startCol: c1, endRow: r2, endCol: maxCol }
+        }
+      }
+    }
+  }
+
+  return best
+}
+
 export function generateCalendarPdf(grid: CalendarGrid, options: PdfOptions): jsPDF {
   const doc = new jsPDF({
     orientation: 'landscape',
@@ -54,10 +95,12 @@ export function generateCalendarPdf(grid: CalendarGrid, options: PdfOptions): js
   })
 
   const paddedWeeks = padGridToSixRows(grid.weeks)
+  const titleRegion = findTitleRegion(paddedWeeks)
 
   drawGrid(doc)
   drawHeaderRow(doc)
   drawDayCells(doc, paddedWeeks)
+  drawTitle(doc, titleRegion, options.title)
 
   return doc
 }
@@ -184,4 +227,30 @@ function drawCellContent(
       holidayY += eventLineHeight
     }
   }
+}
+
+function drawTitle(doc: jsPDF, region: TitleRegion, title: string): void {
+  const headerBottom = MARGIN + HEADER_ROW_HEIGHT
+
+  const x1 = MARGIN + region.startCol * COL_WIDTH
+  const y1 = headerBottom + region.startRow * ROW_HEIGHT
+  const x2 = MARGIN + (region.endCol + 1) * COL_WIDTH
+  const y2 = headerBottom + (region.endRow + 1) * ROW_HEIGHT
+
+  const centerX = (x1 + x2) / 2
+  const centerY = (y1 + y2) / 2
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(TITLE_FONT_SIZE)
+
+  // Scale down if title doesn't fit in the region width
+  const regionWidth = x2 - x1 - 2 * CELL_PADDING
+  let fontSize = TITLE_FONT_SIZE
+  while (fontSize > MIN_FONT_SIZE) {
+    doc.setFontSize(fontSize)
+    if (doc.getTextWidth(title) <= regionWidth) break
+    fontSize -= 1
+  }
+
+  doc.text(title, centerX, centerY, { align: 'center', baseline: 'middle' })
 }
