@@ -16,6 +16,7 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
   const [month, setMonth] = useState(1)
   const [day, setDay] = useState(1)
   const [selectedGroups, setSelectedGroups] = useState<string[]>([])
+  const [error, setError] = useState('')
 
   const resetForm = useCallback(() => {
     setName('')
@@ -23,18 +24,27 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
     setMonth(1)
     setDay(1)
     setSelectedGroups([])
+    setError('')
     setExpanded(false)
   }, [])
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      if (!name.trim()) return
+      if (!name.trim()) {
+        setError('Name is required')
+        return
+      }
       onAdd({ name, type, month, day, groups: selectedGroups })
       resetForm()
     },
     [name, type, month, day, selectedGroups, onAdd, resetForm],
   )
+
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value)
+    if (error) setError('')
+  }, [error])
 
   const toggleGroup = useCallback((group: string) => {
     setSelectedGroups((prev) =>
@@ -52,8 +62,9 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
     <form onSubmit={handleSubmit}>
       <label>
         Name
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+        <input type="text" value={name} onChange={handleNameChange} />
       </label>
+      {error && <p className="form-error">{error}</p>}
       <label>
         Type
         <select value={type} onChange={(e) => setType(e.target.value as EventType)}>

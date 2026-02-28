@@ -51,7 +51,7 @@ describe('EventForm', () => {
     expect(screen.queryByLabelText(/name/i)).not.toBeInTheDocument()
   })
 
-  test('does not submit when name is empty', () => {
+  test('does not submit when name is empty and shows error', () => {
     const onAdd = vi.fn()
     render(<EventForm onAdd={onAdd} availableGroups={[]} />)
     fireEvent.click(screen.getByRole('button', { name: /add event/i }))
@@ -60,8 +60,18 @@ describe('EventForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /save event/i }))
 
     expect(onAdd).not.toHaveBeenCalled()
-    // Form should stay open
     expect(screen.getByLabelText(/name/i)).toBeInTheDocument()
+    expect(screen.getByText(/name is required/i)).toBeInTheDocument()
+  })
+
+  test('error clears when user types a name', () => {
+    render(<EventForm onAdd={vi.fn()} availableGroups={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+    fireEvent.click(screen.getByRole('button', { name: /save event/i }))
+    expect(screen.getByText(/name is required/i)).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'A' } })
+    expect(screen.queryByText(/name is required/i)).not.toBeInTheDocument()
   })
 
   test('shows existing groups as checkboxes', () => {
