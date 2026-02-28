@@ -17,6 +17,7 @@ export function EventList({ events, onUpdate, onDelete }: EventListProps) {
   const [editName, setEditName] = useState('')
   const [editMonth, setEditMonth] = useState(1)
   const [editDay, setEditDay] = useState(1)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   const startEdit = useCallback((event: CalendarEvent) => {
     setEditingId(event.id)
@@ -81,7 +82,14 @@ export function EventList({ events, onUpdate, onDelete }: EventListProps) {
                 <span>{event.name}</span>
                 <span> ({event.type}) {event.month}/{event.day}</span>
                 <button onClick={() => startEdit(event)}>Edit</button>
-                <button onClick={() => onDelete(event.id)}>Delete</button>
+                {confirmDeleteId === event.id ? (
+                  <>
+                    <button onClick={() => { onDelete(event.id); setConfirmDeleteId(null) }}>Confirm</button>
+                    <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
+                  </>
+                ) : (
+                  <button onClick={() => setConfirmDeleteId(event.id)}>Delete</button>
+                )}
               </>
             )}
           </div>

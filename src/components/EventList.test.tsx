@@ -19,12 +19,27 @@ describe('EventList', () => {
     expect(screen.getByText('Carol')).toBeInTheDocument()
   })
 
-  test('delete button removes an event', () => {
+  test('delete requires confirmation before calling onDelete', () => {
     const onDelete = vi.fn()
     render(<EventList events={events} onUpdate={() => {}} onDelete={onDelete} />)
     const deleteButtons = screen.getAllByRole('button', { name: /delete/i })
     fireEvent.click(deleteButtons[0])
+
+    // Should not delete yet
+    expect(onDelete).not.toHaveBeenCalled()
+    // Should show confirm/cancel
+    fireEvent.click(screen.getByRole('button', { name: /confirm/i }))
     expect(onDelete).toHaveBeenCalledWith('1')
+  })
+
+  test('cancelling delete does not call onDelete', () => {
+    const onDelete = vi.fn()
+    render(<EventList events={events} onUpdate={() => {}} onDelete={onDelete} />)
+    fireEvent.click(screen.getAllByRole('button', { name: /delete/i })[0])
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
+    expect(onDelete).not.toHaveBeenCalled()
+    // Delete button should be back
+    expect(screen.getAllByRole('button', { name: /delete/i })).toHaveLength(3)
   })
 
   test('edit button opens inline editor', () => {
