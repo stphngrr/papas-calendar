@@ -33,7 +33,7 @@ export function useCalendarState() {
     return events.filter(
       (e) =>
         e.month === selectedMonth &&
-        e.groups.some((g) => enabledSet.has(g)),
+        (e.groups.length === 0 || e.groups.some((g) => enabledSet.has(g))),
     )
   }, [events, selectedMonth, enabledGroups])
 
