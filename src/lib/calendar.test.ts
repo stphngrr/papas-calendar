@@ -130,4 +130,45 @@ describe('buildCalendarGrid', () => {
     }
     expect(found).toBe(true)
   })
+
+  test('holidays and moon phases are placed in correct cells', () => {
+    const holidays: Holiday[] = [
+      { name: "PRESIDENTS' DAY", month: 2, day: 16 },
+      { name: "LINCOLN'S BIRTHDAY", month: 2, day: 12 },
+    ]
+    const moonPhases: MoonPhase[] = [
+      { type: 'Full Moon', month: 2, day: 1 },
+      { type: 'Last Qtr', month: 2, day: 9 },
+    ]
+
+    const grid = buildCalendarGrid(2026, 2, [], holidays, moonPhases)
+
+    // Feb 16 is Monday (row 2, col 1)
+    const feb16 = grid.weeks[2][1]
+    expect(feb16).not.toBeNull()
+    expect(feb16!.day).toBe(16)
+    expect(feb16!.holidays).toHaveLength(1)
+    expect(feb16!.holidays[0].name).toBe("PRESIDENTS' DAY")
+
+    // Feb 12 is Thursday (row 1, col 4)
+    const feb12 = grid.weeks[1][4]
+    expect(feb12).not.toBeNull()
+    expect(feb12!.day).toBe(12)
+    expect(feb12!.holidays).toHaveLength(1)
+    expect(feb12!.holidays[0].name).toBe("LINCOLN'S BIRTHDAY")
+
+    // Feb 1 is Sunday (row 0, col 0)
+    const feb1 = grid.weeks[0][0]
+    expect(feb1).not.toBeNull()
+    expect(feb1!.day).toBe(1)
+    expect(feb1!.moonPhases).toHaveLength(1)
+    expect(feb1!.moonPhases[0].type).toBe('Full Moon')
+
+    // Feb 9 is Monday (row 1, col 1)
+    const feb9 = grid.weeks[1][1]
+    expect(feb9).not.toBeNull()
+    expect(feb9!.day).toBe(9)
+    expect(feb9!.moonPhases).toHaveLength(1)
+    expect(feb9!.moonPhases[0].type).toBe('Last Qtr')
+  })
 })
