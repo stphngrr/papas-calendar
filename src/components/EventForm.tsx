@@ -4,6 +4,7 @@
 import { useState, useCallback } from 'react'
 import type { CalendarEvent, EventType } from '../types'
 import { MONTH_NAMES } from '../constants'
+import { isValidDay } from '../lib/validation'
 
 interface EventFormProps {
   onAdd: (event: Omit<CalendarEvent, 'id'>) => void
@@ -34,6 +35,10 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
       e.preventDefault()
       if (!name.trim()) {
         setError('Name is required')
+        return
+      }
+      if (!isValidDay(month, day)) {
+        setError('Invalid day for the selected month')
         return
       }
       onAdd({ name, type, month, day, groups: selectedGroups })
@@ -83,7 +88,7 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
       </label>
       <label>
         Day
-        <input type="number" min={1} max={31} value={day} onChange={(e) => setDay(Number(e.target.value))} />
+        <input type="number" min={1} max={31} value={day} onChange={(e) => { setDay(Number(e.target.value)); if (error) setError('') }} />
       </label>
       {availableGroups.length > 0 && (
         <fieldset>

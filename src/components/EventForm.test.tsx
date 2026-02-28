@@ -93,4 +93,31 @@ describe('EventForm', () => {
     expect(screen.getByLabelText('Work')).toBeInTheDocument()
   })
 
+  test('rejects invalid day for the selected month on submit', () => {
+    const onAdd = vi.fn()
+    render(<EventForm onAdd={onAdd} availableGroups={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Test' } })
+    fireEvent.change(screen.getByLabelText(/month/i), { target: { value: '2' } })
+    fireEvent.change(screen.getByLabelText(/day/i), { target: { value: '30' } })
+    fireEvent.click(screen.getByRole('button', { name: /save event/i }))
+
+    expect(onAdd).not.toHaveBeenCalled()
+    expect(screen.getByText(/invalid day/i)).toBeInTheDocument()
+  })
+
+  test('day validation error clears when day changes', () => {
+    render(<EventForm onAdd={vi.fn()} availableGroups={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Test' } })
+    fireEvent.change(screen.getByLabelText(/month/i), { target: { value: '2' } })
+    fireEvent.change(screen.getByLabelText(/day/i), { target: { value: '30' } })
+    fireEvent.click(screen.getByRole('button', { name: /save event/i }))
+    expect(screen.getByText(/invalid day/i)).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText(/day/i), { target: { value: '15' } })
+    expect(screen.queryByText(/invalid day/i)).not.toBeInTheDocument()
+  })
 })
