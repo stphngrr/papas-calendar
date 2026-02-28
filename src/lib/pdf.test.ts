@@ -3,7 +3,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { writeFileSync } from 'fs'
-import { generateCalendarPdf, padGridToSixRows, findTitleRegion, formatMoonPhase, formatEvent } from './pdf'
+import { generateCalendarPdf, padGridToSixRows, findTitleRegion, formatMoonPhase, formatEvent, formatOverflowEvent } from './pdf'
 import { buildCalendarGrid } from './calendar'
 import { getMoonPhases } from './moon'
 import { getHolidaysForMonth, HOLIDAY_DEFINITIONS } from './holidays'
@@ -122,6 +122,20 @@ describe('formatEvent', () => {
   it('formats an anniversary as A: NAME', () => {
     expect(formatEvent({ id: '2', name: 'SAM & KASSIE JONES', type: 'A', month: 2, day: 19, groups: [] }))
       .toBe('A: SAM & KASSIE JONES')
+  })
+})
+
+describe('formatOverflowEvent', () => {
+  it('formats an overflow anniversary with month and day', () => {
+    expect(formatOverflowEvent(
+      { id: '1', name: 'MATT & ELIZABETH KERN', type: 'A', month: 2, day: 29, groups: [] },
+    )).toBe('A: MATT & ELIZABETH KERN FEB 29')
+  })
+
+  it('formats an overflow birthday with month and day', () => {
+    expect(formatOverflowEvent(
+      { id: '2', name: 'JOHN DOE', type: 'B', month: 6, day: 31, groups: [] },
+    )).toBe('B: JOHN DOE JUN 31')
   })
 })
 

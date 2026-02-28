@@ -38,6 +38,12 @@ export function formatEvent(event: CalendarEvent): string {
   return `${event.type}: ${event.name}`
 }
 
+const MONTH_ABBR = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+
+export function formatOverflowEvent(event: CalendarEvent): string {
+  return `${event.type}: ${event.name} ${MONTH_ABBR[event.month - 1]} ${event.day}`
+}
+
 export function padGridToSixRows(weeks: (CalendarDay | null)[][]): (CalendarDay | null)[][] {
   const padded = weeks.map(row => [...row])
   while (padded.length < BODY_ROWS) {
@@ -53,22 +59,32 @@ export interface TitleRegion {
   endCol: number
 }
 
-export function findTitleRegion(paddedWeeks: (CalendarDay | null)[][]): TitleRegion {
-  // Find the largest rectangular area of null cells
+function isCellEmpty(
+  paddedWeeks: (CalendarDay | null)[][],
+  row: number,
+  col: number,
+  reserved: Set<string>,
+): boolean {
+  return paddedWeeks[row][col] === null && !reserved.has(`${row},${col}`)
+}
+
+export function findTitleRegion(
+  paddedWeeks: (CalendarDay | null)[][],
+  reserved: Set<string> = new Set(),
+): TitleRegion {
+  // Find the largest rectangular area of empty, unreserved cells
   let best: TitleRegion = { startRow: 0, startCol: 0, endRow: 0, endCol: 0 }
   let bestArea = 0
 
   for (let r1 = 0; r1 < BODY_ROWS; r1++) {
     for (let c1 = 0; c1 < COLS; c1++) {
-      if (paddedWeeks[r1][c1] !== null) continue
+      if (!isCellEmpty(paddedWeeks, r1, c1, reserved)) continue
 
-      // Try all rectangles starting at (r1, c1)
       for (let r2 = r1; r2 < BODY_ROWS; r2++) {
-        // Find the max column extent for this row range
         let maxCol = COLS - 1
         for (let r = r1; r <= r2; r++) {
           let colLimit = c1
-          while (colLimit <= maxCol && paddedWeeks[r][colLimit] === null) {
+          while (colLimit <= maxCol && isCellEmpty(paddedWeeks, r, colLimit, reserved)) {
             colLimit++
           }
           maxCol = colLimit - 1
@@ -95,11 +111,16 @@ export function generateCalendarPdf(grid: CalendarGrid, options: PdfOptions): js
   })
 
   const paddedWeeks = padGridToSixRows(grid.weeks)
-  const titleRegion = findTitleRegion(paddedWeeks)
+
+  // Reserve empty cells for overflow events before finding the title region
+  const overflowCells = findOverflowCells(paddedWeeks, grid.overflowEvents.length)
+  const reserved = new Set(overflowCells.map(c => `${c.row},${c.col}`))
+  const titleRegion = findTitleRegion(paddedWeeks, reserved)
 
   drawGrid(doc)
   drawHeaderRow(doc)
   drawDayCells(doc, paddedWeeks)
+  drawOverflowEvents(doc, overflowCells, grid.overflowEvents)
   drawTitle(doc, titleRegion, options.title)
 
   return doc
@@ -225,6 +246,53 @@ function drawCellContent(
     for (const line of holidayLines) {
       doc.text(line, x + CELL_PADDING, holidayY, { baseline: 'top' })
       holidayY += eventLineHeight
+    }
+  }
+}
+
+function findOverflowCells(
+  paddedWeeks: (CalendarDay | null)[][],
+  count: number,
+): { row: number; col: number }[] {
+  if (count === 0) return []
+
+  // Scan bottom-up, left-to-right for empty cells
+  const cells: { row: number; col: number }[] = []
+  for (let row = BODY_ROWS - 1; row >= 0 && cells.length < count; row--) {
+    for (let col = 0; col < COLS && cells.length < count; col++) {
+      if (paddedWeeks[row][col] === null) {
+        cells.push({ row, col })
+      }
+    }
+  }
+  return cells
+}
+
+function drawOverflowEvents(
+  doc: jsPDF,
+  overflowCells: { row: number; col: number }[],
+  overflowEvents: CalendarEvent[],
+): void {
+  if (overflowEvents.length === 0) return
+
+  const headerBottom = MARGIN + HEADER_ROW_HEIGHT
+
+  for (let i = 0; i < overflowEvents.length && i < overflowCells.length; i++) {
+    const { row, col } = overflowCells[i]
+    const x = MARGIN + col * COL_WIDTH
+    const y = headerBottom + row * ROW_HEIGHT
+    const maxTextWidth = COL_WIDTH - 2 * CELL_PADDING
+
+    const text = formatOverflowEvent(overflowEvents[i])
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(CONTENT_FONT_SIZE)
+    const wrapped = doc.splitTextToSize(text, maxTextWidth) as string[]
+    const lineHeight = getLineHeightMm(doc)
+
+    let cursorY = y + CELL_PADDING
+    for (const line of wrapped) {
+      doc.text(line, x + CELL_PADDING, cursorY, { baseline: 'top' })
+      cursorY += lineHeight
     }
   }
 }
