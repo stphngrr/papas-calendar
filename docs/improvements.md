@@ -16,14 +16,14 @@
 - ~~Events with empty groups are invisible — `filteredEvents` uses `.some()` on groups array, which returns false for empty arrays~~
 
 ### Validation
-- No error handling on CSV file read failures
+- ~~No error handling on CSV file read failures~~
 - ~~EventList inline edit accepts invalid month/day values~~
 - Year input has no min/max bounds
 - No duplicate check when adding custom holidays
 
 ### UX
 - No way to delete custom holidays once added
-- No feedback when CSV uploads with zero valid events
+- ~~No feedback when CSV uploads with zero valid events~~
 - ~~Page title in index.html is still "papas-calendar-scaffold"~~
 
 ### Code quality

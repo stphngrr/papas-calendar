@@ -110,6 +110,7 @@ function App() {
                   onLoad={state.loadEventsFromCsv}
                   eventCount={state.events.length}
                   groupNames={state.availableGroups}
+                  csvErrors={state.csvErrors}
                 />
                 <div className="button-row">
                   <ExportCsvButton events={state.events} />
