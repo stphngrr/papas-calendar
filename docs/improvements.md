@@ -4,7 +4,7 @@
 - ~~Collapse Add Event pane when not in use~~
 - ~~Don't allow event to be added without a name~~
 - ~~Show months as names in dropdowns instead of numbers~~
-- Allow event groups to be edited in the UI
+- ~~Allow event groups to be edited in the UI~~
 - Allow a new group to be added in the UI
 - Verify events in initial-events.csv are correct against example files
 - Side pane is busy and events list can get very long — consider moving to another view

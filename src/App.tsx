@@ -102,6 +102,7 @@ function App() {
               events={state.events}
               onUpdate={state.updateEvent}
               onDelete={state.deleteEvent}
+              availableGroups={state.availableGroups}
             />
           </section>
         </aside>

@@ -9,14 +9,16 @@ interface EventListProps {
   events: CalendarEvent[]
   onUpdate: (id: string, updates: Partial<Omit<CalendarEvent, 'id'>>) => void
   onDelete: (id: string) => void
+  availableGroups: string[]
 }
 
-export function EventList({ events, onUpdate, onDelete }: EventListProps) {
+export function EventList({ events, onUpdate, onDelete, availableGroups }: EventListProps) {
   const [search, setSearch] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editMonth, setEditMonth] = useState(1)
   const [editDay, setEditDay] = useState(1)
+  const [editGroups, setEditGroups] = useState<string[]>([])
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   const startEdit = useCallback((event: CalendarEvent) => {
@@ -24,14 +26,15 @@ export function EventList({ events, onUpdate, onDelete }: EventListProps) {
     setEditName(event.name)
     setEditMonth(event.month)
     setEditDay(event.day)
+    setEditGroups([...event.groups])
   }, [])
 
   const saveEdit = useCallback(() => {
     if (editingId) {
-      onUpdate(editingId, { name: editName, month: editMonth, day: editDay })
+      onUpdate(editingId, { name: editName, month: editMonth, day: editDay, groups: editGroups })
       setEditingId(null)
     }
-  }, [editingId, editName, editMonth, editDay, onUpdate])
+  }, [editingId, editName, editMonth, editDay, editGroups, onUpdate])
 
   const filtered = search
     ? events.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()))
@@ -74,6 +77,25 @@ export function EventList({ events, onUpdate, onDelete }: EventListProps) {
                     aria-label="Day"
                   />
                 </div>
+                {availableGroups.length > 0 && (
+                  <fieldset>
+                    <legend>Groups</legend>
+                    {availableGroups.map((group) => (
+                      <label key={group}>
+                        <input
+                          type="checkbox"
+                          checked={editGroups.includes(group)}
+                          onChange={() => setEditGroups((prev) =>
+                            prev.includes(group)
+                              ? prev.filter((g) => g !== group)
+                              : [...prev, group],
+                          )}
+                        />
+                        {group}
+                      </label>
+                    ))}
+                  </fieldset>
+                )}
                 <button onClick={saveEdit}>Save</button>
                 <button onClick={() => setEditingId(null)}>Cancel</button>
               </>
