@@ -3,6 +3,7 @@
 
 import { useState, useCallback } from 'react'
 import type { CalendarEvent, EventType } from '../types'
+import { MONTH_NAMES } from '../constants'
 
 interface EventFormProps {
   onAdd: (event: Omit<CalendarEvent, 'id'>) => void
@@ -74,7 +75,11 @@ export function EventForm({ onAdd, availableGroups }: EventFormProps) {
       </label>
       <label>
         Month
-        <input type="number" min={1} max={12} value={month} onChange={(e) => setMonth(Number(e.target.value))} />
+        <select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+          {MONTH_NAMES.map((name, i) => (
+            <option key={i + 1} value={i + 1}>{name}</option>
+          ))}
+        </select>
       </label>
       <label>
         Day

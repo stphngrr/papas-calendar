@@ -1,10 +1,7 @@
 // ABOUTME: Month and year selection controls for navigating the calendar.
-// ABOUTME: Month is a dropdown (1-12), year is a numeric input.
+// ABOUTME: Month is a dropdown with names, year is a numeric input.
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-]
+import { MONTH_NAMES } from '../constants'
 
 interface MonthYearSelectorProps {
   month: number

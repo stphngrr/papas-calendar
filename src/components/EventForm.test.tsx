@@ -74,6 +74,17 @@ describe('EventForm', () => {
     expect(screen.queryByText(/name is required/i)).not.toBeInTheDocument()
   })
 
+  test('month dropdown shows month names instead of numbers', () => {
+    render(<EventForm onAdd={() => {}} availableGroups={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+    const monthSelect = screen.getByLabelText(/month/i)
+    const options = Array.from((monthSelect as HTMLSelectElement).options)
+    expect(options.map((o) => o.text)).toEqual([
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ])
+  })
+
   test('shows existing groups as checkboxes', () => {
     render(<EventForm onAdd={() => {}} availableGroups={['Family', 'Friends', 'Work']} />)
     fireEvent.click(screen.getByRole('button', { name: /add event/i }))

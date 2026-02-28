@@ -16,11 +16,7 @@ import { DownloadPdfButton } from './components/DownloadPdfButton'
 import { buildCalendarGrid } from './lib/calendar'
 import { getHolidaysForMonth } from './lib/holidays'
 import { getMoonPhases } from './lib/moon'
-
-const MONTH_NAMES = [
-  'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
-]
+import { MONTH_NAMES } from './constants'
 
 function App() {
   const state = useCalendarState()
@@ -35,7 +31,7 @@ function App() {
     state.filteredEvents, holidays, moonPhases,
   )
   const title = state.customTitle ||
-    `${MONTH_NAMES[state.selectedMonth - 1]} ${state.selectedYear}`
+    `${MONTH_NAMES[state.selectedMonth - 1].toUpperCase()} ${state.selectedYear}`
 
   return (
     <div className="app">
