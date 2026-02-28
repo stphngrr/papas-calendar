@@ -3,7 +3,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { writeFileSync } from 'fs'
-import { generateCalendarPdf, padGridToSixRows, findTitleRegion, formatMoonPhase, formatEvent, formatOverflowEvent } from './pdf'
+import { generateCalendarPdf, padGridToMinRows, findTitleRegion, formatMoonPhase, formatEvent, formatOverflowEvent } from './pdf'
 import { buildCalendarGrid } from './calendar'
 import { getMoonPhases } from './moon'
 import { getHolidaysForMonth, HOLIDAY_DEFINITIONS } from './holidays'
@@ -19,38 +19,36 @@ function makeGrid(weeks: (CalendarDay | null)[][]): CalendarGrid {
   return { year: 2026, month: 2, weeks, overflowEvents: [] }
 }
 
-describe('padGridToSixRows', () => {
-  it('pads a 4-row grid to 6 rows', () => {
+describe('padGridToMinRows', () => {
+  it('pads a 4-row grid to 5 rows', () => {
     const weeks = [
       [makeDay(1), makeDay(2), makeDay(3), makeDay(4), makeDay(5), makeDay(6), makeDay(7)],
       [makeDay(8), makeDay(9), makeDay(10), makeDay(11), makeDay(12), makeDay(13), makeDay(14)],
       [makeDay(15), makeDay(16), makeDay(17), makeDay(18), makeDay(19), makeDay(20), makeDay(21)],
       [makeDay(22), makeDay(23), makeDay(24), makeDay(25), makeDay(26), makeDay(27), makeDay(28)],
     ]
-    const padded = padGridToSixRows(weeks)
-    expect(padded).toHaveLength(6)
+    const padded = padGridToMinRows(weeks)
+    expect(padded).toHaveLength(5)
     // Original data preserved
     expect(padded[0][0]!.day).toBe(1)
     expect(padded[3][6]!.day).toBe(28)
-    // Padded rows are all null
+    // Padded row is all null
     expect(padded[4].every(cell => cell === null)).toBe(true)
-    expect(padded[5].every(cell => cell === null)).toBe(true)
   })
 
-  it('pads a 5-row grid to 6 rows', () => {
+  it('returns 5 rows unchanged for a 5-row grid', () => {
     const weeks = Array(5).fill(null).map(() => Array(7).fill(null) as (CalendarDay | null)[])
     weeks[0][0] = makeDay(1)
-    const padded = padGridToSixRows(weeks)
-    expect(padded).toHaveLength(6)
+    const padded = padGridToMinRows(weeks)
+    expect(padded).toHaveLength(5)
     expect(padded[0][0]!.day).toBe(1)
-    expect(padded[5].every(cell => cell === null)).toBe(true)
   })
 
   it('returns 6 rows unchanged for a 6-row grid', () => {
     const weeks = Array(6).fill(null).map(() => Array(7).fill(null) as (CalendarDay | null)[])
     weeks[0][0] = makeDay(1)
     weeks[5][6] = makeDay(30)
-    const padded = padGridToSixRows(weeks)
+    const padded = padGridToMinRows(weeks)
     expect(padded).toHaveLength(6)
     expect(padded[0][0]!.day).toBe(1)
     expect(padded[5][6]!.day).toBe(30)
@@ -60,9 +58,9 @@ describe('padGridToSixRows', () => {
     const weeks = [
       [makeDay(1), null, null, null, null, null, null],
     ]
-    const padded = padGridToSixRows(weeks)
+    const padded = padGridToMinRows(weeks)
     expect(weeks).toHaveLength(1)
-    expect(padded).toHaveLength(6)
+    expect(padded).toHaveLength(5)
   })
 })
 
@@ -140,18 +138,19 @@ describe('formatOverflowEvent', () => {
 })
 
 describe('findTitleRegion', () => {
-  it('finds bottom two rows for a 4-row month (Feb 2026)', () => {
-    // Feb 2026: starts Sunday, 28 days → 4 rows, padded to 6
-    const weeks = padGridToSixRows([
+  it('finds bottom row for a 4-row month (Feb 2026)', () => {
+    // Feb 2026: starts Sunday, 28 days → 4 rows, padded to 5
+    const weeks = padGridToMinRows([
       [makeDay(1), makeDay(2), makeDay(3), makeDay(4), makeDay(5), makeDay(6), makeDay(7)],
       [makeDay(8), makeDay(9), makeDay(10), makeDay(11), makeDay(12), makeDay(13), makeDay(14)],
       [makeDay(15), makeDay(16), makeDay(17), makeDay(18), makeDay(19), makeDay(20), makeDay(21)],
       [makeDay(22), makeDay(23), makeDay(24), makeDay(25), makeDay(26), makeDay(27), makeDay(28)],
     ])
     const region = findTitleRegion(weeks)
-    // Rows 4-5 are entirely empty — title should span most of them
+    // Row 4 is entirely empty — title spans row 4, cols 0-6
     expect(region.startRow).toBe(4)
-    expect(region.endRow).toBe(5)
+    expect(region.endRow).toBe(4)
+    expect(region.startCol).toBe(0)
     expect(region.endCol).toBe(6)
   })
 
@@ -172,29 +171,24 @@ describe('findTitleRegion', () => {
     expect(region.endCol - region.startCol + 1).toBe(6) // 6 columns wide
   })
 
-  it('finds bottom-right for Dec 2025 (ends Wednesday)', () => {
-    // Dec 2025: starts Monday, 31 days → 5 rows padded to 6
+  it('finds bottom-right for Dec 2025 (5 rows, ends Wednesday)', () => {
+    // Dec 2025: starts Monday, 31 days → 5 rows (no padding needed)
     // Row 0: [null, 1, 2, 3, 4, 5, 6]
     // Row 4: [28, 29, 30, 31, null, null, null]
-    // Row 5: all null
-    const weeks = padGridToSixRows([
+    const weeks: (CalendarDay | null)[][] = [
       [null, makeDay(1), makeDay(2), makeDay(3), makeDay(4), makeDay(5), makeDay(6)],
       [makeDay(7), makeDay(8), makeDay(9), makeDay(10), makeDay(11), makeDay(12), makeDay(13)],
       [makeDay(14), makeDay(15), makeDay(16), makeDay(17), makeDay(18), makeDay(19), makeDay(20)],
       [makeDay(21), makeDay(22), makeDay(23), makeDay(24), makeDay(25), makeDay(26), makeDay(27)],
       [makeDay(28), makeDay(29), makeDay(30), makeDay(31), null, null, null],
-    ])
+    ]
     const region = findTitleRegion(weeks)
-    // Bottom-right: rows 4-5, cols 4-6 (6 cells) OR row 5 cols 0-6 (7 cells)
-    // Row 5 full row (7 cells) is bigger, but rows 4-5 cols 4-6 is also 6 cells
-    // Actually row 0 col 0 + row 5 (all 7) gives 8 cells if we include row 0 col 0...
-    // The largest rectangle: row 5 is all null (7 cells), or rows 4-5 cols 4-6 (6 cells)
-    // 7 > 6, so it should pick row 5
-    // But wait — the example shows title in bottom-right spanning rows 5-6 cols 3-6
-    // Dec 2025 actually has 6 rows of data, not 5. Let me reconsider.
-    // Actually Dec starts Monday, so row 0 has 6 days, and with 31 days needs 5 rows + partial 6th
-    // Let me just verify it returns a reasonable region
-    expect(region.endRow).toBe(5)
+    // Empty cells: row 0 col 0 (1 cell), row 4 cols 4-6 (3 cells)
+    // Largest rectangle is row 4 cols 4-6
+    expect(region.startRow).toBe(4)
+    expect(region.endRow).toBe(4)
+    expect(region.startCol).toBe(4)
+    expect(region.endCol).toBe(6)
   })
 })
 

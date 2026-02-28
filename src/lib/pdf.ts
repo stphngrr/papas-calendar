@@ -17,12 +17,11 @@ const PAGE_WIDTH = 279.4
 const PAGE_HEIGHT = 215.9
 const MARGIN = 5
 const HEADER_ROW_HEIGHT = 8
-const BODY_ROWS = 6
+const MIN_BODY_ROWS = 5
 const COLS = 7
 const GRID_WIDTH = PAGE_WIDTH - 2 * MARGIN
 const GRID_HEIGHT = PAGE_HEIGHT - 2 * MARGIN
 const COL_WIDTH = GRID_WIDTH / COLS
-const ROW_HEIGHT = (GRID_HEIGHT - HEADER_ROW_HEIGHT) / BODY_ROWS
 const CELL_PADDING = 1.5
 
 const DAY_NAMES = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
@@ -48,9 +47,9 @@ export function formatOverflowEvent(event: CalendarEvent): string {
   return `${event.type}: ${event.name} ${MONTH_ABBR[event.month - 1]} ${event.day}`
 }
 
-export function padGridToSixRows(weeks: (CalendarDay | null)[][]): (CalendarDay | null)[][] {
+export function padGridToMinRows(weeks: (CalendarDay | null)[][]): (CalendarDay | null)[][] {
   const padded = weeks.map(row => [...row])
-  while (padded.length < BODY_ROWS) {
+  while (padded.length < MIN_BODY_ROWS) {
     padded.push(Array(COLS).fill(null))
   }
   return padded
@@ -77,14 +76,15 @@ export function findTitleRegion(
   reserved: Set<string> = new Set(),
 ): TitleRegion {
   // Find the largest rectangular area of empty, unreserved cells
+  const bodyRows = paddedWeeks.length
   let best: TitleRegion = { startRow: 0, startCol: 0, endRow: 0, endCol: 0 }
   let bestArea = 0
 
-  for (let r1 = 0; r1 < BODY_ROWS; r1++) {
+  for (let r1 = 0; r1 < bodyRows; r1++) {
     for (let c1 = 0; c1 < COLS; c1++) {
       if (!isCellEmpty(paddedWeeks, r1, c1, reserved)) continue
 
-      for (let r2 = r1; r2 < BODY_ROWS; r2++) {
+      for (let r2 = r1; r2 < bodyRows; r2++) {
         let maxCol = COLS - 1
         for (let r = r1; r <= r2; r++) {
           let colLimit = c1
@@ -114,23 +114,25 @@ export function generateCalendarPdf(grid: CalendarGrid, options: PdfOptions): js
     format: 'letter',
   })
 
-  const paddedWeeks = padGridToSixRows(grid.weeks)
+  const paddedWeeks = padGridToMinRows(grid.weeks)
+  const bodyRows = paddedWeeks.length
+  const rowHeight = (GRID_HEIGHT - HEADER_ROW_HEIGHT) / bodyRows
 
   // Reserve empty cells for overflow events before finding the title region
   const overflowCells = findOverflowCells(paddedWeeks, grid.overflowEvents.length)
   const reserved = new Set(overflowCells.map(c => `${c.row},${c.col}`))
   const titleRegion = findTitleRegion(paddedWeeks, reserved)
 
-  drawGrid(doc)
+  drawGrid(doc, bodyRows, rowHeight)
   drawHeaderRow(doc)
-  drawDayCells(doc, paddedWeeks)
-  drawOverflowEvents(doc, overflowCells, grid.overflowEvents)
-  drawTitle(doc, titleRegion, options.title)
+  drawDayCells(doc, paddedWeeks, rowHeight)
+  drawOverflowEvents(doc, overflowCells, grid.overflowEvents, rowHeight)
+  drawTitle(doc, titleRegion, options.title, rowHeight)
 
   return doc
 }
 
-function drawGrid(doc: jsPDF): void {
+function drawGrid(doc: jsPDF, bodyRows: number, rowHeight: number): void {
   doc.setDrawColor(0)
   doc.setLineWidth(0.3)
 
@@ -142,8 +144,8 @@ function drawGrid(doc: jsPDF): void {
   doc.line(MARGIN, headerBottom, MARGIN + GRID_WIDTH, headerBottom)
 
   // Body row lines
-  for (let row = 1; row < BODY_ROWS; row++) {
-    const y = headerBottom + row * ROW_HEIGHT
+  for (let row = 1; row < bodyRows; row++) {
+    const y = headerBottom + row * rowHeight
     doc.line(MARGIN, y, MARGIN + GRID_WIDTH, y)
   }
 
@@ -166,7 +168,7 @@ function drawHeaderRow(doc: jsPDF): void {
   }
 }
 
-function drawDayCells(doc: jsPDF, paddedWeeks: (CalendarDay | null)[][]): void {
+function drawDayCells(doc: jsPDF, paddedWeeks: (CalendarDay | null)[][], rowHeight: number): void {
   const headerBottom = MARGIN + HEADER_ROW_HEIGHT
 
   for (let row = 0; row < paddedWeeks.length; row++) {
@@ -175,9 +177,9 @@ function drawDayCells(doc: jsPDF, paddedWeeks: (CalendarDay | null)[][]): void {
       if (!cell) continue
 
       const x = MARGIN + col * COL_WIDTH
-      const y = headerBottom + row * ROW_HEIGHT
+      const y = headerBottom + row * rowHeight
 
-      drawCellContent(doc, cell, x, y, COL_WIDTH, ROW_HEIGHT)
+      drawCellContent(doc, cell, x, y, COL_WIDTH, rowHeight)
     }
   }
 }
@@ -262,7 +264,7 @@ function findOverflowCells(
 
   // Scan bottom-up, left-to-right for empty cells
   const cells: { row: number; col: number }[] = []
-  for (let row = BODY_ROWS - 1; row >= 0 && cells.length < count; row--) {
+  for (let row = paddedWeeks.length - 1; row >= 0 && cells.length < count; row--) {
     for (let col = 0; col < COLS && cells.length < count; col++) {
       if (paddedWeeks[row][col] === null) {
         cells.push({ row, col })
@@ -276,6 +278,7 @@ function drawOverflowEvents(
   doc: jsPDF,
   overflowCells: { row: number; col: number }[],
   overflowEvents: CalendarEvent[],
+  rowHeight: number,
 ): void {
   if (overflowEvents.length === 0) return
 
@@ -284,7 +287,7 @@ function drawOverflowEvents(
   for (let i = 0; i < overflowEvents.length && i < overflowCells.length; i++) {
     const { row, col } = overflowCells[i]
     const x = MARGIN + col * COL_WIDTH
-    const y = headerBottom + row * ROW_HEIGHT
+    const y = headerBottom + row * rowHeight
     const maxTextWidth = COL_WIDTH - 2 * CELL_PADDING
 
     const text = formatOverflowEvent(overflowEvents[i])
@@ -301,13 +304,13 @@ function drawOverflowEvents(
   }
 }
 
-function drawTitle(doc: jsPDF, region: TitleRegion, title: string): void {
+function drawTitle(doc: jsPDF, region: TitleRegion, title: string, rowHeight: number): void {
   const headerBottom = MARGIN + HEADER_ROW_HEIGHT
 
   const x1 = MARGIN + region.startCol * COL_WIDTH
-  const y1 = headerBottom + region.startRow * ROW_HEIGHT
+  const y1 = headerBottom + region.startRow * rowHeight
   const x2 = MARGIN + (region.endCol + 1) * COL_WIDTH
-  const y2 = headerBottom + (region.endRow + 1) * ROW_HEIGHT
+  const y2 = headerBottom + (region.endRow + 1) * rowHeight
 
   const centerX = (x1 + x2) / 2
   const centerY = (y1 + y2) / 2
