@@ -3,6 +3,7 @@
 
 import { useState, useCallback } from 'react'
 import type { CalendarEvent } from '../types'
+import { MONTH_NAMES } from '../constants'
 
 interface EventListProps {
   events: CalendarEvent[]
@@ -53,12 +54,15 @@ export function EventList({ events, onUpdate, onDelete }: EventListProps) {
                   onChange={(e) => setEditName(e.target.value)}
                   aria-label="Name"
                 />
-                <input
-                  type="number"
+                <select
                   value={editMonth}
                   onChange={(e) => setEditMonth(Number(e.target.value))}
                   aria-label="Month"
-                />
+                >
+                  {MONTH_NAMES.map((name, i) => (
+                    <option key={i + 1} value={i + 1}>{name}</option>
+                  ))}
+                </select>
                 <input
                   type="number"
                   value={editDay}

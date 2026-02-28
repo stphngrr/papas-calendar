@@ -45,6 +45,18 @@ describe('EventList', () => {
     expect(onUpdate).toHaveBeenCalledWith('1', expect.objectContaining({ name: 'Alicia' }))
   })
 
+  test('inline edit shows month names dropdown', () => {
+    render(<EventList events={events} onUpdate={() => {}} onDelete={() => {}} />)
+    fireEvent.click(screen.getAllByRole('button', { name: /edit/i })[0])
+    const monthSelect = screen.getByLabelText('Month') as HTMLSelectElement
+    const options = Array.from(monthSelect.options)
+    expect(options.map((o) => o.text)).toEqual([
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ])
+    expect(monthSelect.value).toBe('3')
+  })
+
   test('search box filters visible events by name', () => {
     render(<EventList events={events} onUpdate={() => {}} onDelete={() => {}} />)
     const searchBox = screen.getByPlaceholderText(/search/i)
