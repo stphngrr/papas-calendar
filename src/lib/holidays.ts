@@ -47,28 +47,6 @@ function addDays(year: number, month: number, day: number, offset: number): { mo
   return { month: d.getMonth() + 1, day: d.getDate() }
 }
 
-// Passover (15 Nisan) — dates as displayed on the example calendars
-const PASSOVER_DATES: Record<number, { month: number; day: number }> = {
-  2024: { month: 4, day: 23 },
-  2025: { month: 4, day: 13 },
-  2026: { month: 4, day: 2 },
-  2027: { month: 4, day: 22 },
-  2028: { month: 4, day: 11 },
-  2029: { month: 3, day: 31 },
-  2030: { month: 4, day: 18 },
-}
-
-// Hanukkah (25 Kislev) — dates as displayed on the example calendars
-const HANUKKAH_DATES: Record<number, { month: number; day: number }> = {
-  2024: { month: 12, day: 26 },
-  2025: { month: 12, day: 15 },
-  2026: { month: 12, day: 5 },
-  2027: { month: 12, day: 25 },
-  2028: { month: 12, day: 13 },
-  2029: { month: 12, day: 2 },
-  2030: { month: 12, day: 21 },
-}
-
 // Equinox/solstice dates (approximate, verified against example PDFs)
 const SPRING_BEGINS: Record<number, number> = {
   2024: 19, 2025: 20, 2026: 20, 2027: 20, 2028: 19, 2029: 20, 2030: 20,
@@ -157,10 +135,6 @@ export const HOLIDAY_DEFINITIONS: HolidayDefinition[] = [
     const easter = easterSunday(y)
     return addDays(y, easter.month, easter.day, 39)
   }},
-
-  // Hebrew calendar holidays (lookup table)
-  { name: "PASSOVER BEGINS", compute: (y) => PASSOVER_DATES[y] ?? null },
-  { name: "HANUKKAH BEGINS", compute: (y) => HANUKKAH_DATES[y] ?? null },
 
   // Seasonal dates (equinoxes and solstices)
   { name: "SPRING BEGINS", compute: (y) => SPRING_BEGINS[y] ? { month: 3, day: SPRING_BEGINS[y] } : null },

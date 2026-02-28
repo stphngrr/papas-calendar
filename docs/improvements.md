@@ -28,7 +28,7 @@
 
 ### Code quality
 - ~~Month name arrays are duplicated in three files — extract to a shared constant~~
-- Passover/Hanukkah lookup tables only cover through 2030
+- ~~Passover/Hanukkah lookup tables only cover through 2030~~ (removed as built-in holidays)
 
 ### Build
 - ~~html2canvas (201 KB) ships as unused transitive dependency~~

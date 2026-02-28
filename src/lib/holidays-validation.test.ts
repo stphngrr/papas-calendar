@@ -25,7 +25,6 @@ const PDF_HOLIDAYS: [string, number, number, number][] = [
   // April 2025
   ["ALL FOOLS' DAY", 2025, 4, 1],
   ['PALM SUNDAY', 2025, 4, 13],
-  ['PASSOVER BEGINS', 2025, 4, 13],
   ['GOOD FRIDAY', 2025, 4, 18],
   ['EASTER SUNDAY', 2025, 4, 20],
   ['EARTH DAY', 2025, 4, 22],
@@ -68,7 +67,6 @@ const PDF_HOLIDAYS: [string, number, number, number][] = [
 
   // December 2025
   ['PEARL HARBOR DAY', 2025, 12, 7],
-  ['HANUKKAH BEGINS', 2025, 12, 15],
   ['WINTER BEGINS', 2025, 12, 21],
   ['CHRISTMAS DAY', 2025, 12, 25],
 ]

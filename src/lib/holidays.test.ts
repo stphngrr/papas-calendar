@@ -38,7 +38,6 @@ describe('holiday definitions', () => {
       // April 2025
       { name: "ALL FOOLS' DAY", year: 2025, month: 4, day: 1 },
       { name: "PALM SUNDAY", year: 2025, month: 4, day: 13 },
-      { name: "PASSOVER BEGINS", year: 2025, month: 4, day: 13 },
       { name: "GOOD FRIDAY", year: 2025, month: 4, day: 18 },
       { name: "EASTER SUNDAY", year: 2025, month: 4, day: 20 },
       { name: "EARTH DAY", year: 2025, month: 4, day: 22 },
@@ -71,7 +70,6 @@ describe('holiday definitions', () => {
       { name: "THANKSGIVING DAY", year: 2025, month: 11, day: 27 },
       // December 2025
       { name: "PEARL HARBOR DAY", year: 2025, month: 12, day: 7 },
-      { name: "HANUKKAH BEGINS", year: 2025, month: 12, day: 15 },
       { name: "WINTER BEGINS", year: 2025, month: 12, day: 21 },
       { name: "CHRISTMAS DAY", year: 2025, month: 12, day: 25 },
       // February 2026
@@ -118,7 +116,6 @@ describe('getHolidaysForMonth', () => {
     const names = dec2025.map(h => h.name)
     expect(names).toContain("CHRISTMAS DAY")
     expect(names).toContain("PEARL HARBOR DAY")
-    expect(names).toContain("HANUKKAH BEGINS")
     expect(names).toContain("WINTER BEGINS")
     // Should NOT include holidays from other months
     expect(names).not.toContain("NEW YEARS DAY")
