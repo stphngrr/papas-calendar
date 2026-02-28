@@ -112,4 +112,49 @@ describe('EventList', () => {
     expect(screen.queryByText('Bob')).not.toBeInTheDocument()
     expect(screen.queryByText('Carol')).not.toBeInTheDocument()
   })
+
+  test('month filter shows only events in the selected month', () => {
+    render(<EventList events={events} onUpdate={() => {}} onDelete={() => {}} availableGroups={groups} />)
+    const monthSelect = screen.getByDisplayValue('All Months')
+    fireEvent.change(monthSelect, { target: { value: '6' } })
+    expect(screen.getByText('Carol')).toBeInTheDocument()
+    expect(screen.queryByText('Alice')).not.toBeInTheDocument()
+    expect(screen.queryByText('Bob')).not.toBeInTheDocument()
+  })
+
+  test('type filter shows only events of the selected type', () => {
+    render(<EventList events={events} onUpdate={() => {}} onDelete={() => {}} availableGroups={groups} />)
+    const typeSelect = screen.getByDisplayValue('All Types')
+    fireEvent.change(typeSelect, { target: { value: 'A' } })
+    expect(screen.getByText('Bob')).toBeInTheDocument()
+    expect(screen.queryByText('Alice')).not.toBeInTheDocument()
+    expect(screen.queryByText('Carol')).not.toBeInTheDocument()
+  })
+
+  test('filters combine with name search using AND logic', () => {
+    render(<EventList events={events} onUpdate={() => {}} onDelete={() => {}} availableGroups={groups} />)
+    // Filter to Family group (Alice + Carol)
+    fireEvent.change(screen.getByDisplayValue('All Groups'), { target: { value: 'Family' } })
+    expect(screen.getByText('Alice')).toBeInTheDocument()
+    expect(screen.getByText('Carol')).toBeInTheDocument()
+    expect(screen.queryByText('Bob')).not.toBeInTheDocument()
+
+    // Add month filter for March — only Alice remains
+    fireEvent.change(screen.getByDisplayValue('All Months'), { target: { value: '3' } })
+    expect(screen.getByText('Alice')).toBeInTheDocument()
+    expect(screen.queryByText('Carol')).not.toBeInTheDocument()
+
+    // Add name search — still Alice
+    fireEvent.change(screen.getByPlaceholderText(/search/i), { target: { value: 'ali' } })
+    expect(screen.getByText('Alice')).toBeInTheDocument()
+  })
+
+  test('group filter shows only events in the selected group', () => {
+    render(<EventList events={events} onUpdate={() => {}} onDelete={() => {}} availableGroups={groups} />)
+    const groupSelect = screen.getByDisplayValue('All Groups')
+    fireEvent.change(groupSelect, { target: { value: 'Friends' } })
+    expect(screen.getByText('Bob')).toBeInTheDocument()
+    expect(screen.queryByText('Alice')).not.toBeInTheDocument()
+    expect(screen.queryByText('Carol')).not.toBeInTheDocument()
+  })
 })

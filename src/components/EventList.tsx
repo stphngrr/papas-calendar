@@ -14,6 +14,9 @@ interface EventListProps {
 
 export function EventList({ events, onUpdate, onDelete, availableGroups }: EventListProps) {
   const [search, setSearch] = useState('')
+  const [filterGroup, setFilterGroup] = useState('')
+  const [filterMonth, setFilterMonth] = useState(0)
+  const [filterType, setFilterType] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editMonth, setEditMonth] = useState(1)
@@ -36,9 +39,13 @@ export function EventList({ events, onUpdate, onDelete, availableGroups }: Event
     }
   }, [editingId, editName, editMonth, editDay, editGroups, onUpdate])
 
-  const filtered = search
-    ? events.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()))
-    : events
+  const filtered = events.filter((e) => {
+    if (search && !e.name.toLowerCase().includes(search.toLowerCase())) return false
+    if (filterGroup && !e.groups.includes(filterGroup)) return false
+    if (filterMonth && e.month !== filterMonth) return false
+    if (filterType && e.type !== filterType) return false
+    return true
+  })
 
   return (
     <div>
@@ -48,6 +55,23 @@ export function EventList({ events, onUpdate, onDelete, availableGroups }: Event
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+      <select value={filterGroup} onChange={(e) => setFilterGroup(e.target.value)}>
+        <option value="">All Groups</option>
+        {availableGroups.map((g) => (
+          <option key={g} value={g}>{g}</option>
+        ))}
+      </select>
+      <select value={filterMonth} onChange={(e) => setFilterMonth(Number(e.target.value))}>
+        <option value={0}>All Months</option>
+        {MONTH_NAMES.map((name, i) => (
+          <option key={i + 1} value={i + 1}>{name}</option>
+        ))}
+      </select>
+      <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+        <option value="">All Types</option>
+        <option value="B">Birthday</option>
+        <option value="A">Anniversary</option>
+      </select>
       <div className="event-list-scroll">
         {filtered.map((event) => (
           <div key={event.id} className={event.groups.length === 0 ? 'ungrouped' : ''}>
