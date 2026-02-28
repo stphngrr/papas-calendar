@@ -3,7 +3,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { getMoonPhases } from './moon'
-import type { MoonPhase } from '../types'
+
 
 describe('getMoonPhases', () => {
   it('returns moon phases for February 2026', () => {

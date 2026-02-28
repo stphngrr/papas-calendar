@@ -1,7 +1,7 @@
 // ABOUTME: Tests for CsvUpload component.
 // ABOUTME: Verifies file upload triggers onLoad and displays summary info.
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { CsvUpload } from './CsvUpload'
 
 describe('CsvUpload', () => {
