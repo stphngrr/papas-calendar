@@ -12,6 +12,7 @@ import { HolidaySettings } from './components/HolidaySettings'
 import { ExportCsvButton } from './components/ExportCsvButton'
 import { CustomTitleInput } from './components/CustomTitleInput'
 import { CalendarPreview } from './components/CalendarPreview'
+import { DownloadPdfButton } from './components/DownloadPdfButton'
 import { buildCalendarGrid } from './lib/calendar'
 import { getHolidaysForMonth } from './lib/holidays'
 import { getMoonPhases } from './lib/moon'
@@ -85,6 +86,7 @@ function App() {
       />
 
       <ExportCsvButton events={state.events} />
+      <DownloadPdfButton grid={grid} title={title} />
 
       <CalendarPreview grid={grid} title={title} />
     </div>
