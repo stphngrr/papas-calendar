@@ -2,7 +2,7 @@
 // ABOUTME: Takes a CalendarGrid and produces a landscape letter PDF matching Papa's calendar style.
 
 import { jsPDF } from 'jspdf'
-import type { CalendarGrid, CalendarDay } from '../types'
+import type { CalendarGrid, CalendarDay, CalendarEvent, MoonPhase } from '../types'
 
 export interface PdfOptions {
   title: string
@@ -29,6 +29,14 @@ const DAY_NUMBER_FONT_SIZE = 14
 const CONTENT_FONT_SIZE = 7
 const TITLE_FONT_SIZE = 26
 const MIN_FONT_SIZE = 5
+
+export function formatMoonPhase(type: MoonPhase['type']): string {
+  return type.toUpperCase()
+}
+
+export function formatEvent(event: CalendarEvent): string {
+  return `${event.type}: ${event.name}`
+}
 
 export function padGridToSixRows(weeks: (CalendarDay | null)[][]): (CalendarDay | null)[][] {
   const padded = weeks.map(row => [...row])
@@ -106,6 +114,10 @@ function drawDayCells(doc: jsPDF, paddedWeeks: (CalendarDay | null)[][]): void {
   }
 }
 
+function getLineHeightMm(doc: jsPDF): number {
+  return doc.getLineHeight() / doc.internal.scaleFactor
+}
+
 function drawCellContent(
   doc: jsPDF,
   cell: CalendarDay,
@@ -114,13 +126,62 @@ function drawCellContent(
   width: number,
   height: number,
 ): void {
+  const maxTextWidth = width - 2 * CELL_PADDING
+
   // Day number (bold, top-left)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(DAY_NUMBER_FONT_SIZE)
-  doc.text(
-    String(cell.day),
-    x + CELL_PADDING,
-    y + CELL_PADDING,
-    { baseline: 'top' },
-  )
+  const dayNumStr = String(cell.day)
+  doc.text(dayNumStr, x + CELL_PADDING, y + CELL_PADDING, { baseline: 'top' })
+
+  // Moon phase on the same line as day number, to the right
+  let cursorY = y + CELL_PADDING
+  if (cell.moonPhases.length > 0) {
+    const dayNumWidth = doc.getTextWidth(dayNumStr)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(CONTENT_FONT_SIZE)
+    const moonText = formatMoonPhase(cell.moonPhases[0].type)
+    doc.text(moonText, x + CELL_PADDING + dayNumWidth + 2, cursorY + 1, { baseline: 'top' })
+  }
+
+  // Advance past day number line
+  doc.setFontSize(DAY_NUMBER_FONT_SIZE)
+  cursorY += getLineHeightMm(doc)
+
+  // Events flowing downward from top
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(CONTENT_FONT_SIZE)
+  const eventLineHeight = getLineHeightMm(doc)
+
+  // Collect holiday text for bottom anchoring — compute how much space they need
+  const holidayLines: string[] = []
+  for (const holiday of cell.holidays) {
+    const wrapped = doc.splitTextToSize(holiday.name, maxTextWidth) as string[]
+    holidayLines.push(...wrapped)
+  }
+  const holidayHeight = holidayLines.length * eventLineHeight
+  const bottomLimit = y + height - CELL_PADDING - holidayHeight
+
+  for (const event of cell.events) {
+    const text = formatEvent(event)
+    const wrapped = doc.splitTextToSize(text, maxTextWidth) as string[]
+    for (const line of wrapped) {
+      if (cursorY >= bottomLimit) break
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(CONTENT_FONT_SIZE)
+      doc.text(line, x + CELL_PADDING, cursorY, { baseline: 'top' })
+      cursorY += eventLineHeight
+    }
+  }
+
+  // Holidays anchored to bottom of cell
+  if (holidayLines.length > 0) {
+    let holidayY = y + height - CELL_PADDING - holidayHeight
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(CONTENT_FONT_SIZE)
+    for (const line of holidayLines) {
+      doc.text(line, x + CELL_PADDING, holidayY, { baseline: 'top' })
+      holidayY += eventLineHeight
+    }
+  }
 }
