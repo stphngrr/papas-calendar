@@ -31,5 +31,5 @@
 - Passover/Hanukkah lookup tables only cover through 2030
 
 ### Build
-- html2canvas (201 KB) ships as unused transitive dependency
-- dist/ may not be in .gitignore
+- ~~html2canvas (201 KB) ships as unused transitive dependency~~
+- ~~dist/ may not be in .gitignore~~
