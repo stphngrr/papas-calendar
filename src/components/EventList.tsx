@@ -43,7 +43,7 @@ export function EventList({ events, onUpdate, onDelete }: EventListProps) {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+      <div className="event-list-scroll">
         {filtered.map((event) => (
           <div key={event.id}>
             {editingId === event.id ? (

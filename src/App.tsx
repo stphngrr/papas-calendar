@@ -38,57 +38,82 @@ function App() {
     `${MONTH_NAMES[state.selectedMonth - 1]} ${state.selectedYear}`
 
   return (
-    <div>
-      <h1>Papa's Calendar</h1>
+    <div className="app">
+      <header className="app-header">
+        <h1>Papa's Calendar</h1>
+      </header>
 
-      <CsvUpload
-        onLoad={state.loadEventsFromCsv}
-        eventCount={state.events.length}
-        groupNames={state.availableGroups}
-      />
+      <div className="app-layout">
+        <aside className="control-panel">
+          <section className="panel-section">
+            <h2 className="section-label">Import / Export</h2>
+            <CsvUpload
+              onLoad={state.loadEventsFromCsv}
+              eventCount={state.events.length}
+              groupNames={state.availableGroups}
+            />
+            <div className="button-row">
+              <ExportCsvButton events={state.events} />
+              <DownloadPdfButton grid={grid} title={title} />
+            </div>
+          </section>
 
-      <MonthYearSelector
-        month={state.selectedMonth}
-        year={state.selectedYear}
-        onMonthChange={state.setMonth}
-        onYearChange={state.setYear}
-      />
+          <section className="panel-section">
+            <h2 className="section-label">Calendar</h2>
+            <MonthYearSelector
+              month={state.selectedMonth}
+              year={state.selectedYear}
+              onMonthChange={state.setMonth}
+              onYearChange={state.setYear}
+            />
+            <CustomTitleInput
+              value={state.customTitle}
+              onChange={state.setCustomTitle}
+            />
+          </section>
 
-      <CustomTitleInput
-        value={state.customTitle}
-        onChange={state.setCustomTitle}
-      />
+          {state.availableGroups.length > 0 && (
+            <section className="panel-section">
+              <h2 className="section-label">Groups</h2>
+              <GroupFilter
+                groups={state.availableGroups}
+                enabledGroups={state.enabledGroups}
+                onToggle={state.toggleGroup}
+              />
+            </section>
+          )}
 
-      {state.availableGroups.length > 0 && (
-        <GroupFilter
-          groups={state.availableGroups}
-          enabledGroups={state.enabledGroups}
-          onToggle={state.toggleGroup}
-        />
-      )}
+          <section className="panel-section">
+            <HolidaySettings
+              enabledHolidays={state.enabledHolidays}
+              customHolidays={state.customHolidays}
+              onToggle={state.toggleHoliday}
+              onAddCustom={state.addCustomHoliday}
+            />
+          </section>
 
-      <HolidaySettings
-        enabledHolidays={state.enabledHolidays}
-        customHolidays={state.customHolidays}
-        onToggle={state.toggleHoliday}
-        onAddCustom={state.addCustomHoliday}
-      />
+          <section className="panel-section">
+            <h2 className="section-label">Add Event</h2>
+            <EventForm
+              onAdd={state.addEvent}
+              availableGroups={state.availableGroups}
+            />
+          </section>
 
-      <EventForm
-        onAdd={state.addEvent}
-        availableGroups={state.availableGroups}
-      />
+          <section className="panel-section">
+            <h2 className="section-label">Events ({state.events.length})</h2>
+            <EventList
+              events={state.events}
+              onUpdate={state.updateEvent}
+              onDelete={state.deleteEvent}
+            />
+          </section>
+        </aside>
 
-      <EventList
-        events={state.events}
-        onUpdate={state.updateEvent}
-        onDelete={state.deleteEvent}
-      />
-
-      <ExportCsvButton events={state.events} />
-      <DownloadPdfButton grid={grid} title={title} />
-
-      <CalendarPreview grid={grid} title={title} />
+        <main className="preview-panel">
+          <CalendarPreview grid={grid} title={title} />
+        </main>
+      </div>
     </div>
   )
 }

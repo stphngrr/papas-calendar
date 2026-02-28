@@ -18,13 +18,11 @@ export function CalendarPreview({ grid, title }: CalendarPreviewProps) {
   return (
     <div>
       <h2>{title}</h2>
-      <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+      <table>
         <thead>
           <tr>
             {DAY_NAMES.map((name) => (
-              <th key={name} style={{ border: '1px solid black', padding: '4px', textAlign: 'center' }}>
-                {name}
-              </th>
+              <th key={name}>{name}</th>
             ))}
           </tr>
         </thead>
@@ -32,7 +30,7 @@ export function CalendarPreview({ grid, title }: CalendarPreviewProps) {
           {grid.weeks.map((week, wi) => (
             <tr key={wi}>
               {week.map((cell, ci) => (
-                <td key={ci} style={{ border: '1px solid black', padding: '4px', verticalAlign: 'top', minHeight: '60px' }}>
+                <td key={ci}>
                   {cell && <DayCell cell={cell} />}
                 </td>
               ))}
@@ -41,7 +39,7 @@ export function CalendarPreview({ grid, title }: CalendarPreviewProps) {
         </tbody>
       </table>
       {grid.overflowEvents.length > 0 && (
-        <div>
+        <div className="overflow-events">
           {grid.overflowEvents.map((event) => (
             <div key={event.id}>
               {event.type}: {event.name} {MONTH_NAMES[event.month - 1]} {event.day}
@@ -56,21 +54,19 @@ export function CalendarPreview({ grid, title }: CalendarPreviewProps) {
 function DayCell({ cell }: { cell: CalendarDay }) {
   return (
     <>
-      <div>
+      <div className="day-header">
         <strong>{cell.day}</strong>
         {cell.moonPhases.map((mp, i) => (
-          <span key={i} style={{ fontSize: '0.7em', marginLeft: '4px' }}>
-            {mp.type.toUpperCase()}
-          </span>
+          <span key={i} className="moon-phase">{mp.type.toUpperCase()}</span>
         ))}
       </div>
       {cell.events.map((event) => (
-        <div key={event.id} style={{ fontSize: '0.75em' }}>
+        <div key={event.id} className="cell-event">
           {event.type}: {event.name}
         </div>
       ))}
       {cell.holidays.map((holiday, i) => (
-        <div key={i} style={{ fontSize: '0.75em' }}>
+        <div key={i} className="cell-holiday">
           {holiday.name}
         </div>
       ))}
