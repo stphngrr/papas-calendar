@@ -1,6 +1,8 @@
 // ABOUTME: Holiday definitions and date computation for calendar display.
 // ABOUTME: Contains fixed and floating holiday rules derived from example calendars.
 
+import type { Holiday } from '../types'
+
 /**
  * Returns the day-of-month for the nth occurrence of a weekday in a given month.
  * weekday: 0=Sunday, 1=Monday, ..., 6=Saturday
@@ -166,3 +168,29 @@ export const HOLIDAY_DEFINITIONS: HolidayDefinition[] = [
   { name: "AUTUMN BEGINS", compute: (y) => AUTUMN_BEGINS[y] ? { month: 9, day: AUTUMN_BEGINS[y] } : null },
   { name: "WINTER BEGINS", compute: (y) => WINTER_BEGINS[y] ? { month: 12, day: WINTER_BEGINS[y] } : null },
 ]
+
+export function getHolidaysForMonth(
+  year: number,
+  month: number,
+  enabledHolidays: string[],
+  customHolidays: Holiday[] = [],
+): Holiday[] {
+  const enabledSet = new Set(enabledHolidays)
+  const holidays: Holiday[] = []
+
+  for (const def of HOLIDAY_DEFINITIONS) {
+    if (!enabledSet.has(def.name)) continue
+    const result = def.compute(year)
+    if (result && result.month === month) {
+      holidays.push({ name: def.name, month: result.month, day: result.day })
+    }
+  }
+
+  for (const custom of customHolidays) {
+    if (custom.month === month) {
+      holidays.push(custom)
+    }
+  }
+
+  return holidays
+}

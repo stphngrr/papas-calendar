@@ -2,7 +2,7 @@
 // ABOUTME: Validates holiday dates against the example PDF calendars.
 
 import { describe, it, expect } from 'vitest'
-import { nthWeekdayOfMonth, HOLIDAY_DEFINITIONS } from './holidays'
+import { nthWeekdayOfMonth, HOLIDAY_DEFINITIONS, getHolidaysForMonth } from './holidays'
 
 describe('nthWeekdayOfMonth', () => {
   it('3rd Monday of February 2026 is day 16', () => {
@@ -106,5 +106,44 @@ describe('holiday definitions', () => {
     // Even year should also work
     const result2024 = findHoliday("ELECTION DAY").compute(2024)
     expect(result2024).toEqual({ month: 11, day: 5 })
+  })
+})
+
+describe('getHolidaysForMonth', () => {
+  const allHolidayNames = HOLIDAY_DEFINITIONS.map(h => h.name)
+
+  it('returns only holidays in the given month', () => {
+    // December 2025: should include Christmas, Pearl Harbor Day, Hanukkah, Winter Begins
+    const dec2025 = getHolidaysForMonth(2025, 12, allHolidayNames)
+    const names = dec2025.map(h => h.name)
+    expect(names).toContain("CHRISTMAS DAY")
+    expect(names).toContain("PEARL HARBOR DAY")
+    expect(names).toContain("HANUKKAH BEGINS")
+    expect(names).toContain("WINTER BEGINS")
+    // Should NOT include holidays from other months
+    expect(names).not.toContain("NEW YEARS DAY")
+    expect(names).not.toContain("HALLOWEEN")
+  })
+
+  it('respects the enabled list — disabled holidays are excluded', () => {
+    const enabled = allHolidayNames.filter(n => n !== "CHRISTMAS DAY")
+    const dec2025 = getHolidaysForMonth(2025, 12, enabled)
+    const names = dec2025.map(h => h.name)
+    expect(names).not.toContain("CHRISTMAS DAY")
+    expect(names).toContain("PEARL HARBOR DAY")
+  })
+
+  it('returns empty array when no holidays fall in the month', () => {
+    // August has no holidays in our list
+    const aug2025 = getHolidaysForMonth(2025, 8, allHolidayNames)
+    expect(aug2025).toEqual([])
+  })
+
+  it('includes custom holidays', () => {
+    const custom = [{ name: "PAPA'S BIRTHDAY", month: 12, day: 15 }]
+    const dec2025 = getHolidaysForMonth(2025, 12, allHolidayNames, custom)
+    const names = dec2025.map(h => h.name)
+    expect(names).toContain("PAPA'S BIRTHDAY")
+    expect(names).toContain("CHRISTMAS DAY")
   })
 })
