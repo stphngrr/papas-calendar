@@ -272,6 +272,20 @@ form button[type="submit"]:hover {
   border-bottom: none;
 }
 
+.edit-date-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.edit-month-select {
+  width: 70px;
+}
+
+.edit-day-input {
+  width: 50px;
+}
+
 /* Responsive — stack on narrow screens */
 @media (max-width: 768px) {
   .app-layout {

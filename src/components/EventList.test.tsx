@@ -51,8 +51,8 @@ describe('EventList', () => {
     const monthSelect = screen.getByLabelText('Month') as HTMLSelectElement
     const options = Array.from(monthSelect.options)
     expect(options.map((o) => o.text)).toEqual([
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ])
     expect(monthSelect.value).toBe('3')
   })

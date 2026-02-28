@@ -54,21 +54,25 @@ export function EventList({ events, onUpdate, onDelete }: EventListProps) {
                   onChange={(e) => setEditName(e.target.value)}
                   aria-label="Name"
                 />
-                <select
-                  value={editMonth}
-                  onChange={(e) => setEditMonth(Number(e.target.value))}
-                  aria-label="Month"
-                >
-                  {MONTH_NAMES.map((name, i) => (
-                    <option key={i + 1} value={i + 1}>{name}</option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  value={editDay}
-                  onChange={(e) => setEditDay(Number(e.target.value))}
-                  aria-label="Day"
-                />
+                <div className="edit-date-row">
+                  <select
+                    className="edit-month-select"
+                    value={editMonth}
+                    onChange={(e) => setEditMonth(Number(e.target.value))}
+                    aria-label="Month"
+                  >
+                    {MONTH_NAMES.map((name, i) => (
+                      <option key={i + 1} value={i + 1}>{name.slice(0, 3)}</option>
+                    ))}
+                  </select>
+                  <input
+                    className="edit-day-input"
+                    type="number"
+                    value={editDay}
+                    onChange={(e) => setEditDay(Number(e.target.value))}
+                    aria-label="Day"
+                  />
+                </div>
                 <button onClick={saveEdit}>Save</button>
                 <button onClick={() => setEditingId(null)}>Cancel</button>
               </>
