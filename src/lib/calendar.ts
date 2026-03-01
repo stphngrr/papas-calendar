@@ -8,7 +8,8 @@ export function buildCalendarGrid(
   month: number,
   events: CalendarEvent[],
   holidays: Holiday[],
-  moonPhases: MoonPhase[]
+  moonPhases: MoonPhase[],
+  recurringEvents: { name: string; day: number }[] = [],
 ): CalendarGrid {
   const startDow = new Date(year, month - 1, 1).getDay()
   const daysInMonth = new Date(year, month, 0).getDate()
@@ -59,6 +60,12 @@ export function buildCalendarGrid(
     if (phase.month !== month) continue
     const cell = findCell(weeks, phase.day)
     if (cell) cell.moonPhases.push(phase)
+  }
+
+  // Place recurring events
+  for (const re of recurringEvents) {
+    const cell = findCell(weeks, re.day)
+    if (cell) cell.recurringEvents.push(re.name)
   }
 
   return { year, month, weeks, overflowEvents }

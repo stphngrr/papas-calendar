@@ -171,4 +171,47 @@ describe('buildCalendarGrid', () => {
     expect(feb9!.moonPhases).toHaveLength(1)
     expect(feb9!.moonPhases[0].type).toBe('Last Qtr')
   })
+
+  test('recurring events are placed on correct days', () => {
+    const recurring = [
+      { name: 'CHURCH - 9 AM', day: 5 },
+      { name: 'CHURCH - 9 AM', day: 12 },
+      { name: 'CHURCH - 9 AM', day: 19 },
+      { name: 'CHURCH - 9 AM', day: 26 },
+    ]
+
+    // January 2025: starts on Wednesday
+    const grid = buildCalendarGrid(2025, 1, [], [], [], recurring)
+
+    // Jan 5 is Sunday (row 1, col 0)
+    expect(grid.weeks[1][0]!.recurringEvents).toEqual(['CHURCH - 9 AM'])
+    // Jan 12 is Sunday (row 2, col 0)
+    expect(grid.weeks[2][0]!.recurringEvents).toEqual(['CHURCH - 9 AM'])
+  })
+
+  test('recurring events coexist with regular events and holidays in same cell', () => {
+    const events: CalendarEvent[] = [
+      { id: '1', name: 'BECKY LEWIS', type: 'B', month: 1, day: 26, groups: ['Lewis'] },
+    ]
+    const holidays: Holiday[] = [
+      { name: 'SOME HOLIDAY', month: 1, day: 26 },
+    ]
+    const recurring = [
+      { name: 'CHURCH - 9 AM', day: 26 },
+    ]
+
+    const grid = buildCalendarGrid(2025, 1, events, holidays, [], recurring)
+
+    // Jan 26 (Sunday, row 4, col 0)
+    const jan26 = grid.weeks[4][0]!
+    expect(jan26.events).toHaveLength(1)
+    expect(jan26.holidays).toHaveLength(1)
+    expect(jan26.recurringEvents).toEqual(['CHURCH - 9 AM'])
+  })
+
+  test('days without recurring events have empty recurringEvents array', () => {
+    const grid = buildCalendarGrid(2025, 1, [], [], [], [])
+    // Jan 1 is Wednesday (row 0, col 3)
+    expect(grid.weeks[0][3]!.recurringEvents).toEqual([])
+  })
 })
