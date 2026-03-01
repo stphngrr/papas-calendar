@@ -199,4 +199,65 @@ describe('EventList', () => {
     expect(screen.queryByText('Alice')).not.toBeInTheDocument()
     expect(screen.queryByText('Carol')).not.toBeInTheDocument()
   })
+
+  test('R events display recurrence description instead of month/day', () => {
+    const recurringEvents: CalendarEvent[] = [
+      {
+        id: '1', name: 'CHURCH - 9 AM', type: 'R', month: 0, day: 0,
+        groups: ['Hooper'],
+        recurrence: { kind: 'weekly', dayOfWeek: 0 },
+      },
+    ]
+    render(<EventList events={recurringEvents} onUpdate={() => {}} onDelete={() => {}} availableGroups={['Hooper']} />)
+    expect(screen.getByText(/Every Sunday/)).toBeInTheDocument()
+    expect(screen.queryByText('0/0')).not.toBeInTheDocument()
+  })
+
+  test('R events are not hidden by month filter', () => {
+    const mixedEvents: CalendarEvent[] = [
+      { id: '1', name: 'Alice', type: 'B', month: 3, day: 15, groups: ['Family'] },
+      {
+        id: '2', name: 'CHURCH', type: 'R', month: 0, day: 0,
+        groups: ['Hooper'],
+        recurrence: { kind: 'weekly', dayOfWeek: 0 },
+      },
+    ]
+    render(<EventList events={mixedEvents} onUpdate={() => {}} onDelete={() => {}} availableGroups={['Family', 'Hooper']} />)
+
+    fireEvent.change(screen.getByDisplayValue('All Months'), { target: { value: '6' } })
+    expect(screen.queryByText('Alice')).not.toBeInTheDocument()
+    expect(screen.getByText('CHURCH')).toBeInTheDocument()
+  })
+
+  test('type filter can select Recurring events', () => {
+    const mixedEvents: CalendarEvent[] = [
+      { id: '1', name: 'Alice', type: 'B', month: 3, day: 15, groups: ['Family'] },
+      {
+        id: '2', name: 'CHURCH', type: 'R', month: 0, day: 0,
+        groups: ['Hooper'],
+        recurrence: { kind: 'weekly', dayOfWeek: 0 },
+      },
+    ]
+    render(<EventList events={mixedEvents} onUpdate={() => {}} onDelete={() => {}} availableGroups={['Family', 'Hooper']} />)
+
+    fireEvent.change(screen.getByDisplayValue('All Types'), { target: { value: 'R' } })
+    expect(screen.queryByText('Alice')).not.toBeInTheDocument()
+    expect(screen.getByText('CHURCH')).toBeInTheDocument()
+  })
+
+  test('inline edit of R event shows recurrence fields', () => {
+    const onUpdate = vi.fn()
+    const recurringEvents: CalendarEvent[] = [
+      {
+        id: '1', name: 'CHURCH', type: 'R', month: 0, day: 0,
+        groups: ['Hooper'],
+        recurrence: { kind: 'weekly', dayOfWeek: 0 },
+      },
+    ]
+    render(<EventList events={recurringEvents} onUpdate={onUpdate} onDelete={() => {}} availableGroups={['Hooper']} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /edit/i }))
+    expect(screen.getByLabelText(/day of week/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/^month$/i)).not.toBeInTheDocument()
+  })
 })
