@@ -72,3 +72,19 @@ export function expandRecurringEvents(
 
   return results
 }
+
+const DAY_NAME_LIST = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+const ORDINAL_SUFFIXES = ['th', 'st', 'nd', 'rd', 'th']
+
+function ordinal(n: number): string {
+  return `${n}${ORDINAL_SUFFIXES[n] ?? 'th'}`
+}
+
+export function formatRecurrenceRule(rule: RecurrenceRule): string {
+  const dayName = DAY_NAME_LIST[rule.dayOfWeek]
+  if (rule.kind === 'weekly') {
+    return `Every ${dayName}`
+  }
+  return `${ordinal(rule.n)} ${dayName} of month`
+}

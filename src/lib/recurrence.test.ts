@@ -2,7 +2,7 @@
 // ABOUTME: Validates weekly and nth-weekday patterns against known month layouts.
 
 import { describe, test, expect } from 'vitest'
-import { parseRecurrenceRule, expandRecurringEvents } from './recurrence'
+import { parseRecurrenceRule, expandRecurringEvents, formatRecurrenceRule } from './recurrence'
 import type { CalendarEvent } from '../types'
 
 function makeRecurring(name: string, recurrence: CalendarEvent['recurrence']): CalendarEvent {
@@ -144,5 +144,20 @@ describe('expandRecurringEvents', () => {
     const communionDays = expanded.filter(e => e.name === 'COMMUNION').map(e => e.day)
     expect(churchDays).toEqual([5, 12, 19, 26])
     expect(communionDays).toEqual([5])
+  })
+})
+
+describe('formatRecurrenceRule', () => {
+  test('formats weekly rule', () => {
+    expect(formatRecurrenceRule({ kind: 'weekly', dayOfWeek: 0 })).toBe('Every Sunday')
+    expect(formatRecurrenceRule({ kind: 'weekly', dayOfWeek: 2 })).toBe('Every Tuesday')
+  })
+
+  test('formats nth rule with ordinal suffix', () => {
+    expect(formatRecurrenceRule({ kind: 'nth', n: 1, dayOfWeek: 0 })).toBe('1st Sunday of month')
+    expect(formatRecurrenceRule({ kind: 'nth', n: 2, dayOfWeek: 2 })).toBe('2nd Tuesday of month')
+    expect(formatRecurrenceRule({ kind: 'nth', n: 3, dayOfWeek: 3 })).toBe('3rd Wednesday of month')
+    expect(formatRecurrenceRule({ kind: 'nth', n: 4, dayOfWeek: 4 })).toBe('4th Thursday of month')
+    expect(formatRecurrenceRule({ kind: 'nth', n: 5, dayOfWeek: 5 })).toBe('5th Friday of month')
   })
 })
