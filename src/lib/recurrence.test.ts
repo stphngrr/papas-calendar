@@ -173,3 +173,36 @@ describe('serializeRecurrenceRule', () => {
     expect(serializeRecurrenceRule({ kind: 'nth', n: 3, dayOfWeek: 3 })).toBe('nth:3:Wednesday')
   })
 })
+
+describe('validation against January 2025 church calendar', () => {
+  const churchEvents: CalendarEvent[] = [
+    { id: '1', name: 'CHURCH - 9 AM', type: 'R', month: 0, day: 0, groups: ['Hooper'], recurrence: { kind: 'weekly', dayOfWeek: 0 } },
+    { id: '2', name: 'SUNDAY SCHOOL 10:15 AM', type: 'R', month: 0, day: 0, groups: ['Hooper'], recurrence: { kind: 'weekly', dayOfWeek: 0 } },
+    { id: '3', name: '7:00 PM - CHURCH ADULT BIBLE STUDY', type: 'R', month: 0, day: 0, groups: ['Hooper'], recurrence: { kind: 'weekly', dayOfWeek: 2 } },
+    { id: '4', name: 'COMMUNION', type: 'R', month: 0, day: 0, groups: ['Hooper'], recurrence: { kind: 'nth', n: 1, dayOfWeek: 0 } },
+  ]
+
+  test('CHURCH - 9 AM appears every Sunday', () => {
+    const expanded = expandRecurringEvents(churchEvents, 2025, 1)
+    const churchDays = expanded.filter(e => e.name === 'CHURCH - 9 AM').map(e => e.day)
+    expect(churchDays).toEqual([5, 12, 19, 26])
+  })
+
+  test('SUNDAY SCHOOL appears every Sunday', () => {
+    const expanded = expandRecurringEvents(churchEvents, 2025, 1)
+    const ssDays = expanded.filter(e => e.name === 'SUNDAY SCHOOL 10:15 AM').map(e => e.day)
+    expect(ssDays).toEqual([5, 12, 19, 26])
+  })
+
+  test('ADULT BIBLE STUDY appears every Tuesday', () => {
+    const expanded = expandRecurringEvents(churchEvents, 2025, 1)
+    const absDays = expanded.filter(e => e.name === '7:00 PM - CHURCH ADULT BIBLE STUDY').map(e => e.day)
+    expect(absDays).toEqual([7, 14, 21, 28])
+  })
+
+  test('COMMUNION appears only on the first Sunday', () => {
+    const expanded = expandRecurringEvents(churchEvents, 2025, 1)
+    const communionDays = expanded.filter(e => e.name === 'COMMUNION').map(e => e.day)
+    expect(communionDays).toEqual([5])
+  })
+})
