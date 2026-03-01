@@ -27,6 +27,7 @@ export function buildCalendarGrid(
         events: [],
         holidays: [],
         moonPhases: [],
+        recurringEvents: [],
       }
       currentDay++
     }

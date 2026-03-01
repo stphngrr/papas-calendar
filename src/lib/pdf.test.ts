@@ -12,7 +12,7 @@ import type { CalendarGrid, CalendarDay, CalendarEvent } from '../types'
 const ALL_HOLIDAYS = HOLIDAY_DEFINITIONS.map(d => d.name)
 
 function makeDay(day: number): CalendarDay {
-  return { day, events: [], holidays: [], moonPhases: [] }
+  return { day, events: [], holidays: [], moonPhases: [], recurringEvents: [] }
 }
 
 function makeGrid(weeks: (CalendarDay | null)[][]): CalendarGrid {

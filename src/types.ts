@@ -34,6 +34,7 @@ export interface CalendarDay {
   events: CalendarEvent[]
   holidays: Holiday[]
   moonPhases: MoonPhase[]
+  recurringEvents: string[]
 }
 
 export interface CalendarGrid {
