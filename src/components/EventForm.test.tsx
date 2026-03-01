@@ -120,4 +120,80 @@ describe('EventForm', () => {
     fireEvent.change(screen.getByLabelText(/day/i), { target: { value: '15' } })
     expect(screen.queryByText(/invalid day/i)).not.toBeInTheDocument()
   })
+
+  test('selecting Recurring type shows recurrence fields and hides month/day', () => {
+    render(<EventForm onAdd={() => {}} availableGroups={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+
+    fireEvent.change(screen.getByLabelText(/type/i), { target: { value: 'R' } })
+
+    expect(screen.getByLabelText(/pattern/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/day of week/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/^month$/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/^day$/i)).not.toBeInTheDocument()
+  })
+
+  test('nth pattern shows occurrence dropdown', () => {
+    render(<EventForm onAdd={() => {}} availableGroups={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+    fireEvent.change(screen.getByLabelText(/type/i), { target: { value: 'R' } })
+    fireEvent.change(screen.getByLabelText(/pattern/i), { target: { value: 'nth' } })
+
+    expect(screen.getByLabelText(/occurrence/i)).toBeInTheDocument()
+  })
+
+  test('submitting weekly recurring event calls onAdd correctly', () => {
+    const onAdd = vi.fn()
+    render(<EventForm onAdd={onAdd} availableGroups={['Hooper']} />)
+    fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'CHURCH - 9 AM' } })
+    fireEvent.change(screen.getByLabelText(/type/i), { target: { value: 'R' } })
+    fireEvent.change(screen.getByLabelText(/day of week/i), { target: { value: '0' } })
+    fireEvent.click(screen.getByLabelText('Hooper'))
+    fireEvent.click(screen.getByRole('button', { name: /save event/i }))
+
+    expect(onAdd).toHaveBeenCalledWith({
+      name: 'CHURCH - 9 AM',
+      type: 'R',
+      month: 0,
+      day: 0,
+      groups: ['Hooper'],
+      recurrence: { kind: 'weekly', dayOfWeek: 0 },
+    })
+  })
+
+  test('submitting nth recurring event calls onAdd correctly', () => {
+    const onAdd = vi.fn()
+    render(<EventForm onAdd={onAdd} availableGroups={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'COMMUNION' } })
+    fireEvent.change(screen.getByLabelText(/type/i), { target: { value: 'R' } })
+    fireEvent.change(screen.getByLabelText(/pattern/i), { target: { value: 'nth' } })
+    fireEvent.change(screen.getByLabelText(/occurrence/i), { target: { value: '1' } })
+    fireEvent.change(screen.getByLabelText(/day of week/i), { target: { value: '0' } })
+    fireEvent.click(screen.getByRole('button', { name: /save event/i }))
+
+    expect(onAdd).toHaveBeenCalledWith({
+      name: 'COMMUNION',
+      type: 'R',
+      month: 0,
+      day: 0,
+      groups: [],
+      recurrence: { kind: 'nth', n: 1, dayOfWeek: 0 },
+    })
+  })
+
+  test('switching from R back to B shows month/day fields again', () => {
+    render(<EventForm onAdd={() => {}} availableGroups={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+
+    fireEvent.change(screen.getByLabelText(/type/i), { target: { value: 'R' } })
+    expect(screen.queryByLabelText(/^month$/i)).not.toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText(/type/i), { target: { value: 'B' } })
+    expect(screen.getByLabelText(/^month$/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^day$/i)).toBeInTheDocument()
+  })
 })
