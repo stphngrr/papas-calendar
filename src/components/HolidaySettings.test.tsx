@@ -95,6 +95,16 @@ describe('HolidaySettings', () => {
     expect(onRemoveCustom).toHaveBeenCalledWith('PIZZA DAY')
   })
 
+  test('holiday month is a dropdown with month names', () => {
+    renderAndExpand()
+    const monthSelect = screen.getByLabelText(/holiday month/i)
+    expect(monthSelect.tagName).toBe('SELECT')
+    const options = Array.from(monthSelect.querySelectorAll('option'))
+    expect(options).toHaveLength(12)
+    expect(options[0].textContent).toBe('January')
+    expect(options[11].textContent).toBe('December')
+  })
+
   test('clears duplicate error when name changes', () => {
     const onAddCustom = vi.fn()
     renderAndExpand({

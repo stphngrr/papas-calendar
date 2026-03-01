@@ -4,6 +4,7 @@
 import { useState, useCallback } from 'react'
 import type { Holiday } from '../types'
 import { HOLIDAY_DEFINITIONS } from '../lib/holidays'
+import { MONTH_NAMES } from '../constants'
 
 interface HolidaySettingsProps {
   enabledHolidays: string[]
@@ -90,7 +91,11 @@ export function HolidaySettings({
             </label>
             <label>
               Holiday month
-              <input type="number" min={1} max={12} value={customMonth} onChange={(e) => setCustomMonth(Number(e.target.value))} />
+              <select value={customMonth} onChange={(e) => setCustomMonth(Number(e.target.value))}>
+                {MONTH_NAMES.map((name, i) => (
+                  <option key={i + 1} value={i + 1}>{name}</option>
+                ))}
+              </select>
             </label>
             <label>
               Holiday day
