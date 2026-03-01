@@ -4,7 +4,7 @@
 import { render, screen } from '@testing-library/react'
 import { CalendarPreview } from './CalendarPreview'
 import { buildCalendarGrid } from '../lib/calendar'
-import type { CalendarEvent, Holiday, MoonPhase } from '../types'
+import type { CalendarEvent, CalendarGrid, Holiday, MoonPhase } from '../types'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -99,5 +99,13 @@ describe('CalendarPreview', () => {
     const grid = makeGrid({ events })
     render(<CalendarPreview grid={grid} title="FEBRUARY 2026" />)
     expect(screen.getByText(/A: MATT & ELIZABETH KERN FEB 29/)).toBeInTheDocument()
+  })
+
+  test('renders recurring events without type prefix', () => {
+    const recurring = [{ name: 'CHURCH - 9 AM', day: 5 }]
+    const grid = buildCalendarGrid(2025, 1, [], [], [], recurring)
+    render(<CalendarPreview grid={grid} title="JANUARY 2025" />)
+    expect(screen.getByText('CHURCH - 9 AM')).toBeInTheDocument()
+    expect(screen.queryByText(/[BA]: CHURCH/)).not.toBeInTheDocument()
   })
 })

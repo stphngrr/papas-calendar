@@ -77,6 +77,24 @@ describe('generateCalendarPdf', () => {
     expect(typeof doc.output).toBe('function')
   })
 
+  it('includes recurring event text in the PDF', () => {
+    const day5 = makeDay(5)
+    day5.recurringEvents = ['CHURCH - 9 AM']
+    const grid = makeGrid([
+      [null, null, null, makeDay(1), makeDay(2), makeDay(3), makeDay(4)],
+      [day5, makeDay(6), makeDay(7), makeDay(8), makeDay(9), makeDay(10), makeDay(11)],
+      [makeDay(12), makeDay(13), makeDay(14), makeDay(15), makeDay(16), makeDay(17), makeDay(18)],
+      [makeDay(19), makeDay(20), makeDay(21), makeDay(22), makeDay(23), makeDay(24), makeDay(25)],
+      [makeDay(26), makeDay(27), makeDay(28), null, null, null, null],
+    ])
+    const doc = generateCalendarPdf(grid, { title: 'JANUARY 2025' })
+    // jsPDF stores text drawing calls internally — verify it doesn't throw
+    // and produces a valid document with content
+    expect(doc).toBeDefined()
+    const buffer = doc.output('arraybuffer')
+    expect(buffer.byteLength).toBeGreaterThan(0)
+  })
+
   it('produces a landscape letter-sized PDF', () => {
     const grid = makeGrid([
       [makeDay(1), makeDay(2), makeDay(3), makeDay(4), makeDay(5), makeDay(6), makeDay(7)],

@@ -269,6 +269,17 @@ function drawCellContent(
     }
   }
 
+  for (const name of cell.recurringEvents) {
+    const wrapped = doc.splitTextToSize(name, maxTextWidth) as string[]
+    for (const line of wrapped) {
+      if (cursorY >= bottomLimit) break
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(CONTENT_FONT_SIZE)
+      doc.text(line, x + CELL_PADDING, cursorY, { baseline: 'top' })
+      cursorY += eventLineHeight
+    }
+  }
+
   // Holidays anchored to bottom of cell
   if (holidayLines.length > 0) {
     let holidayY = y + height - CELL_PADDING - holidayHeight

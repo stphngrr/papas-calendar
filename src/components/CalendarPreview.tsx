@@ -65,6 +65,11 @@ function DayCell({ cell }: { cell: CalendarDay }) {
           {event.type}: {event.name}
         </div>
       ))}
+      {cell.recurringEvents.map((name, i) => (
+        <div key={`recurring-${i}`} className="cell-event">
+          {name}
+        </div>
+      ))}
       {cell.holidays.map((holiday, i) => (
         <div key={i} className="cell-holiday">
           {holiday.name}
