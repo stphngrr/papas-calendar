@@ -81,6 +81,14 @@ function ordinal(n: number): string {
   return `${n}${ORDINAL_SUFFIXES[n] ?? 'th'}`
 }
 
+export function serializeRecurrenceRule(rule: RecurrenceRule): string {
+  const dayName = DAY_NAME_LIST[rule.dayOfWeek]
+  if (rule.kind === 'weekly') {
+    return `weekly:${dayName}`
+  }
+  return `nth:${rule.n}:${dayName}`
+}
+
 export function formatRecurrenceRule(rule: RecurrenceRule): string {
   const dayName = DAY_NAME_LIST[rule.dayOfWeek]
   if (rule.kind === 'weekly') {

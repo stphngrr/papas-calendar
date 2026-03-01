@@ -2,7 +2,7 @@
 // ABOUTME: Validates weekly and nth-weekday patterns against known month layouts.
 
 import { describe, test, expect } from 'vitest'
-import { parseRecurrenceRule, expandRecurringEvents, formatRecurrenceRule } from './recurrence'
+import { parseRecurrenceRule, expandRecurringEvents, formatRecurrenceRule, serializeRecurrenceRule } from './recurrence'
 import type { CalendarEvent } from '../types'
 
 function makeRecurring(name: string, recurrence: CalendarEvent['recurrence']): CalendarEvent {
@@ -159,5 +159,17 @@ describe('formatRecurrenceRule', () => {
     expect(formatRecurrenceRule({ kind: 'nth', n: 3, dayOfWeek: 3 })).toBe('3rd Wednesday of month')
     expect(formatRecurrenceRule({ kind: 'nth', n: 4, dayOfWeek: 4 })).toBe('4th Thursday of month')
     expect(formatRecurrenceRule({ kind: 'nth', n: 5, dayOfWeek: 5 })).toBe('5th Friday of month')
+  })
+})
+
+describe('serializeRecurrenceRule', () => {
+  test('serializes weekly rule', () => {
+    expect(serializeRecurrenceRule({ kind: 'weekly', dayOfWeek: 0 })).toBe('weekly:Sunday')
+    expect(serializeRecurrenceRule({ kind: 'weekly', dayOfWeek: 2 })).toBe('weekly:Tuesday')
+  })
+
+  test('serializes nth rule', () => {
+    expect(serializeRecurrenceRule({ kind: 'nth', n: 1, dayOfWeek: 0 })).toBe('nth:1:Sunday')
+    expect(serializeRecurrenceRule({ kind: 'nth', n: 3, dayOfWeek: 3 })).toBe('nth:3:Wednesday')
   })
 })
