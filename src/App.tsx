@@ -14,6 +14,7 @@ import { CustomTitleInput } from './components/CustomTitleInput'
 import { CalendarPreview } from './components/CalendarPreview'
 import { DownloadPdfButton } from './components/DownloadPdfButton'
 import { buildCalendarGrid } from './lib/calendar'
+import { expandRecurringEvents } from './lib/recurrence'
 import { getHolidaysForMonth } from './lib/holidays'
 import { getMoonPhases } from './lib/moon'
 import { MONTH_NAMES } from './constants'
@@ -28,9 +29,12 @@ function App() {
     state.enabledHolidays, state.customHolidays,
   )
   const moonPhases = getMoonPhases(state.selectedYear, state.selectedMonth)
+  const expandedRecurring = expandRecurringEvents(
+    state.filteredEvents, state.selectedYear, state.selectedMonth,
+  )
   const grid = buildCalendarGrid(
     state.selectedYear, state.selectedMonth,
-    state.filteredEvents, holidays, moonPhases,
+    state.filteredEvents, holidays, moonPhases, expandedRecurring,
   )
   const monthYear = `${MONTH_NAMES[state.selectedMonth - 1].toUpperCase()} ${state.selectedYear}`
   const title = state.customTitle

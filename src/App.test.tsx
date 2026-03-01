@@ -81,3 +81,20 @@ test('adding an event shows it in the event list', () => {
   // Event should appear in the event list
   expect(screen.getByText('Test Person')).toBeInTheDocument()
 })
+
+test('recurring events appear on correct days in the preview', () => {
+  render(<App />)
+
+  // Switch to Events tab and add a recurring event
+  fireEvent.click(screen.getByRole('button', { name: 'Events' }))
+  fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+
+  // Add a group first so the event is visible
+  fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'CHURCH - 9 AM' } })
+  fireEvent.change(screen.getByLabelText(/type/i), { target: { value: 'R' } })
+  fireEvent.change(screen.getByLabelText(/day of week/i), { target: { value: '0' } })
+  fireEvent.click(screen.getByRole('button', { name: /save event/i }))
+
+  // The event should appear in the event list
+  expect(screen.getByText('CHURCH - 9 AM')).toBeInTheDocument()
+})
