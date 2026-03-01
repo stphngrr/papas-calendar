@@ -3,6 +3,7 @@
 
 import Papa from 'papaparse'
 import type { CalendarEvent, EventType } from '../types'
+import { parseRecurrenceRule, serializeRecurrenceRule } from './recurrence'
 
 export interface CsvParseResult {
   events: CalendarEvent[]
@@ -53,40 +54,78 @@ export function parseEventsFromCsv(csvString: string): CsvParseResult {
       errors.push(`Row ${rowNum}: invalid type "${rawType}" (expected B, A, or R)`)
       continue
     }
-    if (!isValidMonth(month)) {
-      errors.push(`Row ${rowNum}: invalid month "${rawMonth}"`)
-      continue
-    }
-    if (!isValidDay(day)) {
-      errors.push(`Row ${rowNum}: invalid day "${rawDay}"`)
-      continue
-    }
 
     const type = rawType as EventType
-    const dedupKey = `${name.toLowerCase()}|${type}|${month}|${day}`
-    if (seen.has(dedupKey)) {
-      const existing = events.find(
-        (e) => `${e.name.toLowerCase()}|${e.type}|${e.month}|${e.day}` === dedupKey
-      )!
-      const existingGroups = new Set(existing.groups)
-      for (const g of groups) {
-        if (!existingGroups.has(g)) {
-          existing.groups.push(g)
-          existingGroups.add(g)
-        }
-      }
-      continue
-    }
-    seen.add(dedupKey)
 
-    events.push({
-      id: crypto.randomUUID(),
-      name,
-      type,
-      month,
-      day,
-      groups,
-    })
+    if (type === 'R') {
+      const rawRecurrence = (row.Recurrence ?? '').trim()
+      if (!rawRecurrence) {
+        errors.push(`Row ${rowNum}: R event missing recurrence rule`)
+        continue
+      }
+      const recurrence = parseRecurrenceRule(rawRecurrence)
+      if (!recurrence) {
+        errors.push(`Row ${rowNum}: invalid recurrence rule "${rawRecurrence}"`)
+        continue
+      }
+      const dedupKey = `${name.toLowerCase()}|R|${rawRecurrence.toLowerCase()}`
+      if (seen.has(dedupKey)) {
+        const existing = events.find(
+          (e) => e.type === 'R' && e.name.toLowerCase() === name.toLowerCase()
+            && e.recurrence && `${e.name.toLowerCase()}|R|${rawRecurrence.toLowerCase()}` === dedupKey
+        )!
+        const existingGroups = new Set(existing.groups)
+        for (const g of groups) {
+          if (!existingGroups.has(g)) {
+            existing.groups.push(g)
+            existingGroups.add(g)
+          }
+        }
+        continue
+      }
+      seen.add(dedupKey)
+      events.push({
+        id: crypto.randomUUID(),
+        name,
+        type,
+        month: 0,
+        day: 0,
+        groups,
+        recurrence,
+      })
+    } else {
+      if (!isValidMonth(month)) {
+        errors.push(`Row ${rowNum}: invalid month "${rawMonth}"`)
+        continue
+      }
+      if (!isValidDay(day)) {
+        errors.push(`Row ${rowNum}: invalid day "${rawDay}"`)
+        continue
+      }
+      const dedupKey = `${name.toLowerCase()}|${type}|${month}|${day}`
+      if (seen.has(dedupKey)) {
+        const existing = events.find(
+          (e) => `${e.name.toLowerCase()}|${e.type}|${e.month}|${e.day}` === dedupKey
+        )!
+        const existingGroups = new Set(existing.groups)
+        for (const g of groups) {
+          if (!existingGroups.has(g)) {
+            existing.groups.push(g)
+            existingGroups.add(g)
+          }
+        }
+        continue
+      }
+      seen.add(dedupKey)
+      events.push({
+        id: crypto.randomUUID(),
+        name,
+        type,
+        month,
+        day,
+        groups,
+      })
+    }
   }
 
   return { events, errors }
@@ -96,13 +135,14 @@ export function exportEventsToCsv(events: CalendarEvent[]): string {
   const rows = events.map((e) => ({
     Name: e.name,
     Type: e.type,
-    Month: e.month,
-    Day: e.day,
+    Month: e.type === 'R' ? '' : e.month,
+    Day: e.type === 'R' ? '' : e.day,
     Groups: e.groups.join(','),
+    Recurrence: e.recurrence ? serializeRecurrenceRule(e.recurrence) : '',
   }))
 
   return Papa.unparse(rows, {
-    columns: ['Name', 'Type', 'Month', 'Day', 'Groups'],
+    columns: ['Name', 'Type', 'Month', 'Day', 'Groups', 'Recurrence'],
   })
 }
 

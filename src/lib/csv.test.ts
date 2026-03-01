@@ -232,6 +232,102 @@ Amy Holland,B,2,4,Lewis`
 
     expect(result.errors).toEqual([])
   })
+
+  it('parses an R event with weekly recurrence', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence
+CHURCH - 9 AM,R,,,Hooper,weekly:Sunday`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(1)
+    expect(result.errors).toEqual([])
+    expect(result.events[0].type).toBe('R')
+    expect(result.events[0].month).toBe(0)
+    expect(result.events[0].day).toBe(0)
+    expect(result.events[0].groups).toEqual(['Hooper'])
+    expect(result.events[0].recurrence).toEqual({ kind: 'weekly', dayOfWeek: 0 })
+  })
+
+  it('parses an R event with nth recurrence', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence
+COMMUNION,R,,,Hooper,nth:1:Sunday`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(1)
+    expect(result.events[0].recurrence).toEqual({ kind: 'nth', n: 1, dayOfWeek: 0 })
+  })
+
+  it('reports error for R event with missing recurrence', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence
+CHURCH,R,,,Hooper,`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(0)
+    expect(result.errors).toEqual(['Row 2: R event missing recurrence rule'])
+  })
+
+  it('reports error for R event with invalid recurrence', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence
+CHURCH,R,,,Hooper,bogus:value`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(0)
+    expect(result.errors).toEqual(['Row 2: invalid recurrence rule "bogus:value"'])
+  })
+
+  it('parses mixed B, A, and R events', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence
+Amy Holland,B,2,4,Lewis,
+CHURCH - 9 AM,R,,,Hooper,weekly:Sunday
+Sam Jones,A,2,19,"Lewis,Hooper",`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(3)
+    expect(result.errors).toEqual([])
+    expect(result.events[0].type).toBe('B')
+    expect(result.events[0].month).toBe(2)
+    expect(result.events[1].type).toBe('R')
+    expect(result.events[1].recurrence).toEqual({ kind: 'weekly', dayOfWeek: 0 })
+    expect(result.events[2].type).toBe('A')
+  })
+
+  it('backward compatible with 5-column CSV (no Recurrence column)', () => {
+    const csv = `Name,Type,Month,Day,Groups
+Amy Holland,B,2,4,Lewis`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(1)
+    expect(result.events[0].recurrence).toBeUndefined()
+  })
+
+  it('B/A events ignore the Recurrence column if present', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence
+Amy Holland,B,2,4,Lewis,weekly:Sunday`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(1)
+    expect(result.events[0].type).toBe('B')
+    expect(result.events[0].month).toBe(2)
+    expect(result.events[0].day).toBe(4)
+    expect(result.events[0].recurrence).toBeUndefined()
+  })
+
+  it('deduplicates R events by name and recurrence string', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence
+CHURCH - 9 AM,R,,,Hooper,weekly:Sunday
+CHURCH - 9 AM,R,,,Lewis,weekly:Sunday`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(1)
+    expect(result.events[0].groups).toEqual(['Hooper', 'Lewis'])
+  })
 })
 
 describe('exportEventsToCsv', () => {
@@ -242,7 +338,7 @@ describe('exportEventsToCsv', () => {
 
     const csv = exportEventsToCsv(events)
 
-    expect(csv).toContain('Name,Type,Month,Day,Groups')
+    expect(csv).toContain('Name,Type,Month,Day,Groups,Recurrence')
     expect(csv).toContain('Amy Holland,B,2,4,Lewis')
   })
 
@@ -274,5 +370,29 @@ Tootsie P,B,2,16,Lewis`
       expect(reparsed[i].day).toBe(events[i].day)
       expect(reparsed[i].groups).toEqual(events[i].groups)
     }
+  })
+
+  it('round-trips R events through parse and export', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence
+CHURCH - 9 AM,R,,,Hooper,weekly:Sunday
+COMMUNION,R,,,Hooper,nth:1:Sunday
+Amy Holland,B,2,4,Lewis,`
+
+    const { events } = parseEventsFromCsv(csv)
+    const exported = exportEventsToCsv(events)
+    const { events: reparsed } = parseEventsFromCsv(exported)
+
+    expect(reparsed).toHaveLength(3)
+    const church = reparsed.find(e => e.name === 'CHURCH - 9 AM')!
+    expect(church.type).toBe('R')
+    expect(church.recurrence).toEqual({ kind: 'weekly', dayOfWeek: 0 })
+
+    const communion = reparsed.find(e => e.name === 'COMMUNION')!
+    expect(communion.recurrence).toEqual({ kind: 'nth', n: 1, dayOfWeek: 0 })
+
+    const amy = reparsed.find(e => e.name === 'Amy Holland')!
+    expect(amy.type).toBe('B')
+    expect(amy.month).toBe(2)
+    expect(amy.recurrence).toBeUndefined()
   })
 })
