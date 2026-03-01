@@ -1,7 +1,7 @@
 // ABOUTME: Expands recurring events into concrete dates for a given month/year.
 // ABOUTME: Handles weekly and nth-weekday recurrence patterns.
 
-import type { RecurrenceRule } from '../types'
+import type { CalendarEvent, RecurrenceRule } from '../types'
 
 const DAY_NAMES: Record<string, number> = {
   sunday: 0, monday: 1, tuesday: 2, wednesday: 3,
@@ -31,4 +31,44 @@ export function parseRecurrenceRule(raw: string): RecurrenceRule | null {
   }
 
   return null
+}
+
+export interface ExpandedRecurringEvent {
+  name: string
+  day: number
+}
+
+export function expandRecurringEvents(
+  events: CalendarEvent[],
+  year: number,
+  month: number,
+): ExpandedRecurringEvent[] {
+  const results: ExpandedRecurringEvent[] = []
+  const daysInMonth = new Date(year, month, 0).getDate()
+
+  for (const event of events) {
+    if (event.type !== 'R' || !event.recurrence) continue
+
+    const rule = event.recurrence
+    if (rule.kind === 'weekly') {
+      for (let d = 1; d <= daysInMonth; d++) {
+        if (new Date(year, month - 1, d).getDay() === rule.dayOfWeek) {
+          results.push({ name: event.name, day: d })
+        }
+      }
+    } else if (rule.kind === 'nth') {
+      let count = 0
+      for (let d = 1; d <= daysInMonth; d++) {
+        if (new Date(year, month - 1, d).getDay() === rule.dayOfWeek) {
+          count++
+          if (count === rule.n) {
+            results.push({ name: event.name, day: d })
+            break
+          }
+        }
+      }
+    }
+  }
+
+  return results
 }
