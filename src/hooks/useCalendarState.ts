@@ -35,11 +35,11 @@ export function useCalendarState() {
 
   const filteredEvents = useMemo(() => {
     const enabledSet = new Set(enabledGroups)
-    return events.filter(
-      (e) =>
-        e.month === selectedMonth &&
-        e.groups.some((g) => enabledSet.has(g)),
-    )
+    return events.filter((e) => {
+      if (!e.groups.some((g) => enabledSet.has(g))) return false
+      if (e.type === 'R') return true
+      return e.month === selectedMonth
+    })
   }, [events, selectedMonth, enabledGroups])
 
   const loadEventsFromCsv = useCallback((csvString: string) => {

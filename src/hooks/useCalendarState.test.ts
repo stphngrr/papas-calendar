@@ -206,4 +206,39 @@ Valid Person,B,6,15,Family`
     expect(result.current.customHolidays).toHaveLength(1)
     expect(result.current.customHolidays[0].name).toBe('TACO DAY')
   })
+
+  test('filteredEvents includes R events regardless of selected month', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.addEvent({
+      name: 'CHURCH - 9 AM',
+      type: 'R',
+      month: 0,
+      day: 0,
+      groups: ['Hooper'],
+      recurrence: { kind: 'weekly', dayOfWeek: 0 },
+    }))
+    act(() => result.current.addGroup('Hooper'))
+
+    act(() => result.current.setMonth(3))
+    expect(result.current.filteredEvents.some(e => e.name === 'CHURCH - 9 AM')).toBe(true)
+    act(() => result.current.setMonth(8))
+    expect(result.current.filteredEvents.some(e => e.name === 'CHURCH - 9 AM')).toBe(true)
+  })
+
+  test('filteredEvents excludes R events when their group is disabled', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.addEvent({
+      name: 'CHURCH - 9 AM',
+      type: 'R',
+      month: 0,
+      day: 0,
+      groups: ['Hooper'],
+      recurrence: { kind: 'weekly', dayOfWeek: 0 },
+    }))
+    act(() => result.current.addGroup('Hooper'))
+
+    expect(result.current.filteredEvents.some(e => e.name === 'CHURCH - 9 AM')).toBe(true)
+    act(() => result.current.toggleGroup('Hooper'))
+    expect(result.current.filteredEvents.some(e => e.name === 'CHURCH - 9 AM')).toBe(false)
+  })
 })
