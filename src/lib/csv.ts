@@ -50,7 +50,7 @@ export function parseEventsFromCsv(csvString: string): CsvParseResult {
       continue
     }
     if (!isValidType(rawType)) {
-      errors.push(`Row ${rowNum}: invalid type "${rawType}" (expected B or A)`)
+      errors.push(`Row ${rowNum}: invalid type "${rawType}" (expected B, A, or R)`)
       continue
     }
     if (!isValidMonth(month)) {
@@ -117,7 +117,7 @@ export function downloadCsv(csvString: string, filename: string): void {
 }
 
 function isValidType(type: string): type is EventType {
-  return type === 'B' || type === 'A'
+  return type === 'B' || type === 'A' || type === 'R'
 }
 
 function isValidMonth(month: number): boolean {

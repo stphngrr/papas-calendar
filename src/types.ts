@@ -1,7 +1,11 @@
 // ABOUTME: Shared TypeScript types for calendar events, holidays, and moon phases.
 // ABOUTME: These types are used across lib/, components/, and hooks/.
 
-export type EventType = 'B' | 'A'
+export type EventType = 'B' | 'A' | 'R'
+
+export type RecurrenceRule =
+  | { kind: 'weekly'; dayOfWeek: number }
+  | { kind: 'nth'; n: number; dayOfWeek: number }
 
 export interface CalendarEvent {
   id: string
@@ -10,6 +14,7 @@ export interface CalendarEvent {
   month: number
   day: number
   groups: string[]
+  recurrence?: RecurrenceRule
 }
 
 export interface Holiday {

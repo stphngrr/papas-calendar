@@ -144,7 +144,7 @@ Amy Holland,X,2,4,Lewis`
     const result = parseEventsFromCsv(csv)
 
     expect(result.events).toHaveLength(0)
-    expect(result.errors).toEqual(['Row 2: invalid type "X" (expected B or A)'])
+    expect(result.errors).toEqual(['Row 2: invalid type "X" (expected B, A, or R)'])
   })
 
   it('reports invalid month error', () => {
@@ -220,7 +220,7 @@ Bad Type,X,4,5,Lewis`
     expect(result.events).toHaveLength(2)
     expect(result.errors).toEqual([
       'Row 3: missing name',
-      'Row 5: invalid type "X" (expected B or A)',
+      'Row 5: invalid type "X" (expected B, A, or R)',
     ])
   })
 
