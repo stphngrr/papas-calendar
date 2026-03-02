@@ -29,7 +29,7 @@ const DAY_NAMES = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRID
 // Font sizes in points
 const HEADER_FONT_SIZE = 9
 const DAY_NUMBER_FONT_SIZE = 14
-const CONTENT_FONT_SIZE = 7
+const CONTENT_FONT_SIZE = 7.5
 const TITLE_FONT_SIZE = 26
 const MIN_FONT_SIZE = 5
 
