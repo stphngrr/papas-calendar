@@ -4,7 +4,7 @@
 import { render, screen } from '@testing-library/react'
 import { CalendarPreview } from './CalendarPreview'
 import { buildCalendarGrid } from '../lib/calendar'
-import type { CalendarEvent, CalendarGrid, Holiday, MoonPhase } from '../types'
+import type { CalendarEvent, Holiday, MoonPhase } from '../types'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
