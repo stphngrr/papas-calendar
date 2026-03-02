@@ -108,4 +108,31 @@ describe('CalendarPreview', () => {
     expect(screen.getByText('CHURCH - 9 AM')).toBeInTheDocument()
     expect(screen.queryByText(/[BA]: CHURCH/)).not.toBeInTheDocument()
   })
+
+  test('recurring events appear before regular events in a cell', () => {
+    const events: CalendarEvent[] = [
+      { id: '1', name: 'JUSTIN SMITH', type: 'B', month: 1, day: 12, groups: [] },
+    ]
+    const recurring = [{ name: 'CHURCH - 9 AM', day: 12 }]
+    const grid = buildCalendarGrid(2025, 1, events, [], [], recurring)
+    const { container } = render(<CalendarPreview grid={grid} title="JANUARY 2025" />)
+
+    // Find all .cell-event elements in the cell containing day 12
+    const cellEvents = container.querySelectorAll('.cell-event')
+    const texts = Array.from(cellEvents).map(el => el.textContent)
+    const churchIdx = texts.indexOf('CHURCH - 9 AM')
+    const justinIdx = texts.indexOf('B: JUSTIN SMITH')
+    expect(churchIdx).toBeGreaterThanOrEqual(0)
+    expect(justinIdx).toBeGreaterThanOrEqual(0)
+    expect(churchIdx).toBeLessThan(justinIdx)
+  })
+
+  test('uppercases event names in display', () => {
+    const events: CalendarEvent[] = [
+      { id: '1', name: 'Aaron Smead', type: 'B', month: 2, day: 4, groups: [] },
+    ]
+    const grid = makeGrid({ events })
+    render(<CalendarPreview grid={grid} title="FEBRUARY 2026" />)
+    expect(screen.getByText('B: AARON SMEAD')).toBeInTheDocument()
+  })
 })

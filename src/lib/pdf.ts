@@ -38,13 +38,13 @@ export function formatMoonPhase(type: MoonPhase['type']): string {
 }
 
 export function formatEvent(event: CalendarEvent): string {
-  return `${event.type}: ${event.name}`
+  return `${event.type}: ${event.name.toUpperCase()}`
 }
 
 const MONTH_ABBR = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 
 export function formatOverflowEvent(event: CalendarEvent): string {
-  return `${event.type}: ${event.name} ${MONTH_ABBR[event.month - 1]} ${event.day}`
+  return `${event.type}: ${event.name.toUpperCase()} ${MONTH_ABBR[event.month - 1]} ${event.day}`
 }
 
 export function padGridToMinRows(weeks: (CalendarDay | null)[][]): (CalendarDay | null)[][] {
@@ -257,9 +257,8 @@ function drawCellContent(
   const holidayHeight = holidayLines.length * eventLineHeight
   const bottomLimit = y + height - CELL_PADDING - holidayHeight
 
-  for (const event of cell.events) {
-    const text = formatEvent(event)
-    const wrapped = doc.splitTextToSize(text, maxTextWidth) as string[]
+  for (const name of cell.recurringEvents) {
+    const wrapped = doc.splitTextToSize(name.toUpperCase(), maxTextWidth) as string[]
     for (const line of wrapped) {
       if (cursorY >= bottomLimit) break
       doc.setFont('helvetica', 'normal')
@@ -269,8 +268,9 @@ function drawCellContent(
     }
   }
 
-  for (const name of cell.recurringEvents) {
-    const wrapped = doc.splitTextToSize(name, maxTextWidth) as string[]
+  for (const event of cell.events) {
+    const text = formatEvent(event)
+    const wrapped = doc.splitTextToSize(text, maxTextWidth) as string[]
     for (const line of wrapped) {
       if (cursorY >= bottomLimit) break
       doc.setFont('helvetica', 'normal')

@@ -42,7 +42,7 @@ export function CalendarPreview({ grid, title }: CalendarPreviewProps) {
         <div className="overflow-events">
           {grid.overflowEvents.map((event) => (
             <div key={event.id}>
-              {event.type}: {event.name} {MONTH_NAMES[event.month - 1]} {event.day}
+              {event.type}: {event.name.toUpperCase()} {MONTH_NAMES[event.month - 1]} {event.day}
             </div>
           ))}
         </div>
@@ -60,14 +60,14 @@ function DayCell({ cell }: { cell: CalendarDay }) {
           <span key={i} className="moon-phase">{mp.type.toUpperCase()}</span>
         ))}
       </div>
-      {cell.events.map((event) => (
-        <div key={event.id} className="cell-event">
-          {event.type}: {event.name}
-        </div>
-      ))}
       {cell.recurringEvents.map((name, i) => (
         <div key={`recurring-${i}`} className="cell-event">
-          {name}
+          {name.toUpperCase()}
+        </div>
+      ))}
+      {cell.events.map((event) => (
+        <div key={event.id} className="cell-event">
+          {event.type}: {event.name.toUpperCase()}
         </div>
       ))}
       {cell.holidays.map((holiday, i) => (

@@ -139,6 +139,13 @@ describe('formatEvent', () => {
     expect(formatEvent({ id: '2', name: 'SAM & KASSIE JONES', type: 'A', month: 2, day: 19, groups: [] }))
       .toBe('A: SAM & KASSIE JONES')
   })
+
+  it('uppercases mixed-case event names', () => {
+    expect(formatEvent({ id: '1', name: 'Aaron Smead', type: 'B', month: 1, day: 6, groups: [] }))
+      .toBe('B: AARON SMEAD')
+    expect(formatEvent({ id: '2', name: 'Bryan & Jaclyn Hurst', type: 'A', month: 1, day: 25, groups: [] }))
+      .toBe('A: BRYAN & JACLYN HURST')
+  })
 })
 
 describe('formatOverflowEvent', () => {
@@ -152,6 +159,12 @@ describe('formatOverflowEvent', () => {
     expect(formatOverflowEvent(
       { id: '2', name: 'JOHN DOE', type: 'B', month: 6, day: 31, groups: [] },
     )).toBe('B: JOHN DOE JUN 31')
+  })
+
+  it('uppercases mixed-case overflow event names', () => {
+    expect(formatOverflowEvent(
+      { id: '1', name: 'Matt & Elizabeth Kern', type: 'A', month: 2, day: 29, groups: [] },
+    )).toBe('A: MATT & ELIZABETH KERN FEB 29')
   })
 })
 
