@@ -8,13 +8,17 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/papas-calendar/',
+  optimizeDeps: {
+    // jsPDF optionally imports these for features we don't use (HTML-to-PDF, SVG).
+    // Exclude them from dependency optimization so esbuild doesn't choke on them.
+    exclude: ['html2canvas', 'dompurify', 'canvg'],
+  },
   resolve: {
     alias: {
-      // jsPDF optionally imports these for features we don't use (HTML-to-PDF, SVG).
-      // Alias to empty modules to keep them out of the production bundle.
-      html2canvas: 'data:text/javascript,export default null',
-      dompurify: 'data:text/javascript,export default null',
-      canvg: 'data:text/javascript,export default null',
+      // Stub out jsPDF's optional dependencies with an empty module.
+      html2canvas: new URL('./src/empty-module.ts', import.meta.url).pathname,
+      dompurify: new URL('./src/empty-module.ts', import.meta.url).pathname,
+      canvg: new URL('./src/empty-module.ts', import.meta.url).pathname,
     },
   },
   test: {
