@@ -15,6 +15,7 @@ export interface CalendarEvent {
   day: number
   groups: string[]
   recurrence?: RecurrenceRule
+  deleted?: boolean
 }
 
 export interface Holiday {

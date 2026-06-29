@@ -57,6 +57,8 @@ export function parseEventsFromCsv(csvString: string): CsvParseResult {
 
     const type = rawType as EventType
 
+    const deleted = (row.Deleted ?? '').trim().toLowerCase() === 'true'
+
     if (type === 'R') {
       const rawRecurrence = (row.Recurrence ?? '').trim()
       if (!rawRecurrence) {
@@ -68,11 +70,11 @@ export function parseEventsFromCsv(csvString: string): CsvParseResult {
         errors.push(`Row ${rowNum}: invalid recurrence rule "${rawRecurrence}"`)
         continue
       }
-      const dedupKey = `${name.toLowerCase()}|R|${rawRecurrence.toLowerCase()}`
+      const dedupKey = `${name.toLowerCase()}|R|${rawRecurrence.toLowerCase()}|${deleted}`
       if (seen.has(dedupKey)) {
         const existing = events.find(
           (e) => e.type === 'R' && e.name.toLowerCase() === name.toLowerCase()
-            && e.recurrence && `${e.name.toLowerCase()}|R|${rawRecurrence.toLowerCase()}` === dedupKey
+            && e.recurrence && `${e.name.toLowerCase()}|R|${rawRecurrence.toLowerCase()}|${e.deleted ?? false}` === dedupKey
         )!
         const existingGroups = new Set(existing.groups)
         for (const g of groups) {
@@ -84,7 +86,7 @@ export function parseEventsFromCsv(csvString: string): CsvParseResult {
         continue
       }
       seen.add(dedupKey)
-      events.push({
+      const base = {
         id: crypto.randomUUID(),
         name,
         type,
@@ -92,7 +94,8 @@ export function parseEventsFromCsv(csvString: string): CsvParseResult {
         day: 0,
         groups,
         recurrence,
-      })
+      }
+      events.push(deleted ? { ...base, deleted: true } : base)
     } else {
       if (!isValidMonth(month)) {
         errors.push(`Row ${rowNum}: invalid month "${rawMonth}"`)
@@ -102,10 +105,10 @@ export function parseEventsFromCsv(csvString: string): CsvParseResult {
         errors.push(`Row ${rowNum}: invalid day "${rawDay}"`)
         continue
       }
-      const dedupKey = `${name.toLowerCase()}|${type}|${month}|${day}`
+      const dedupKey = `${name.toLowerCase()}|${type}|${month}|${day}|${deleted}`
       if (seen.has(dedupKey)) {
         const existing = events.find(
-          (e) => `${e.name.toLowerCase()}|${e.type}|${e.month}|${e.day}` === dedupKey
+          (e) => `${e.name.toLowerCase()}|${e.type}|${e.month}|${e.day}|${e.deleted ?? false}` === dedupKey
         )!
         const existingGroups = new Set(existing.groups)
         for (const g of groups) {
@@ -117,14 +120,15 @@ export function parseEventsFromCsv(csvString: string): CsvParseResult {
         continue
       }
       seen.add(dedupKey)
-      events.push({
+      const base = {
         id: crypto.randomUUID(),
         name,
         type,
         month,
         day,
         groups,
-      })
+      }
+      events.push(deleted ? { ...base, deleted: true } : base)
     }
   }
 

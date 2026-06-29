@@ -328,6 +328,70 @@ CHURCH - 9 AM,R,,,Lewis,weekly:Sunday`
     expect(result.events).toHaveLength(1)
     expect(result.events[0].groups).toEqual(['Hooper', 'Lewis'])
   })
+
+  it('parses a row with Deleted=true as deleted', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
+Old Coworker,B,5,9,Work,,true`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(1)
+    expect(result.errors).toEqual([])
+    expect(result.events[0].deleted).toBe(true)
+  })
+
+  it('parses a blank Deleted value as active (deleted undefined)', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
+Amy Holland,B,2,4,Lewis,,`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events[0].deleted).toBeUndefined()
+  })
+
+  it('parses Deleted=false (any case) as active', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
+Amy Holland,B,2,4,Lewis,,FALSE`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events[0].deleted).toBeUndefined()
+  })
+
+  it('treats Deleted=true case-insensitively', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
+Old Coworker,B,5,9,Work,,TRUE`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events[0].deleted).toBe(true)
+  })
+
+  it('keeps a deleted row and an identical active row as distinct events', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
+John,B,3,15,Family,,true
+John,B,3,15,Family,,`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(2)
+    const deleted = result.events.filter((e) => e.deleted)
+    const active = result.events.filter((e) => !e.deleted)
+    expect(deleted).toHaveLength(1)
+    expect(active).toHaveLength(1)
+  })
+
+  it('merges groups of two matching deleted rows', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
+John,B,3,15,Family,,true
+John,B,3,15,Friends,,true`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(1)
+    expect(result.events[0].deleted).toBe(true)
+    expect(result.events[0].groups).toEqual(['Family', 'Friends'])
+  })
 })
 
 describe('exportEventsToCsv', () => {
