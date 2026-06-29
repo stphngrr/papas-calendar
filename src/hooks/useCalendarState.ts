@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import type { CalendarEvent, Holiday } from '../types'
-import { parseEventsFromCsv } from '../lib/csv'
+import { parseEventsFromCsv, compareByDate } from '../lib/csv'
 import { HOLIDAY_DEFINITIONS } from '../lib/holidays'
 
 export function useCalendarState() {
@@ -36,11 +36,22 @@ export function useCalendarState() {
   const filteredEvents = useMemo(() => {
     const enabledSet = new Set(enabledGroups)
     return events.filter((e) => {
+      if (e.deleted) return false
       if (!e.groups.some((g) => enabledSet.has(g))) return false
       if (e.type === 'R') return true
       return e.month === selectedMonth
     })
   }, [events, selectedMonth, enabledGroups])
+
+  const activeEvents = useMemo(
+    () => events.filter((e) => !e.deleted),
+    [events],
+  )
+
+  const deletedEvents = useMemo(
+    () => events.filter((e) => e.deleted).sort(compareByDate),
+    [events],
+  )
 
   const loadEventsFromCsv = useCallback((csvString: string) => {
     const { events: parsed, errors } = parseEventsFromCsv(csvString)
@@ -69,7 +80,15 @@ export function useCalendarState() {
   )
 
   const deleteEvent = useCallback((id: string) => {
-    setEvents((prev) => prev.filter((e) => e.id !== id))
+    setEvents((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, deleted: true } : e)),
+    )
+  }, [])
+
+  const restoreEvent = useCallback((id: string) => {
+    setEvents((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, deleted: false } : e)),
+    )
   }, [])
 
   const setMonth = useCallback((month: number) => {
@@ -142,10 +161,13 @@ export function useCalendarState() {
     customTitle,
     availableGroups,
     filteredEvents,
+    activeEvents,
+    deletedEvents,
     loadEventsFromCsv,
     addEvent,
     updateEvent,
     deleteEvent,
+    restoreEvent,
     setMonth,
     setYear,
     addGroup,

@@ -172,7 +172,7 @@ export function downloadCsv(csvString: string, filename: string): void {
 }
 
 // Recurring events have no calendar date, so they sort after all dated events.
-function compareByDate(a: CalendarEvent, b: CalendarEvent): number {
+export function compareByDate(a: CalendarEvent, b: CalendarEvent): number {
   const aRecurring = a.type === 'R'
   const bRecurring = b.type === 'R'
   if (aRecurring !== bRecurring) return aRecurring ? 1 : -1

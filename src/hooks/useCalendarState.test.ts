@@ -77,14 +77,55 @@ Valid Person,B,6,15,Family`
     expect(result.current.events[0].month).toBe(2) // unchanged
   })
 
-  test('deleteEvent removes an event', () => {
+  test('deleteEvent marks an event deleted but keeps it in events', () => {
     const { result } = renderHook(() => useCalendarState())
     act(() => result.current.addEvent({
-      name: 'Frank', type: 'A', month: 7, day: 4, groups: [],
+      name: 'Frank', type: 'A', month: 7, day: 4, groups: ['Work'],
     }))
     const id = result.current.events[0].id
+
     act(() => result.current.deleteEvent(id))
-    expect(result.current.events).toHaveLength(0)
+
+    expect(result.current.events).toHaveLength(1)
+    expect(result.current.events[0].deleted).toBe(true)
+  })
+
+  test('filteredEvents excludes deleted events', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.addEvent({
+      name: 'Gone', type: 'B', month: 5, day: 1, groups: ['Work'],
+    }))
+    act(() => result.current.addGroup('Work'))
+    act(() => result.current.setMonth(5))
+    const id = result.current.events[0].id
+
+    act(() => result.current.deleteEvent(id))
+
+    expect(result.current.filteredEvents.some((e) => e.name === 'Gone')).toBe(false)
+  })
+
+  test('activeEvents and deletedEvents split the events list', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.addEvent({ name: 'Keep', type: 'B', month: 1, day: 1, groups: [] }))
+    act(() => result.current.addEvent({ name: 'Trash', type: 'B', month: 2, day: 2, groups: [] }))
+    const trashId = result.current.events.find((e) => e.name === 'Trash')!.id
+
+    act(() => result.current.deleteEvent(trashId))
+
+    expect(result.current.activeEvents.map((e) => e.name)).toEqual(['Keep'])
+    expect(result.current.deletedEvents.map((e) => e.name)).toEqual(['Trash'])
+  })
+
+  test('restoreEvent un-deletes an event', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.addEvent({ name: 'Back', type: 'B', month: 1, day: 1, groups: [] }))
+    const id = result.current.events[0].id
+    act(() => result.current.deleteEvent(id))
+
+    act(() => result.current.restoreEvent(id))
+
+    expect(result.current.events[0].deleted).toBe(false)
+    expect(result.current.deletedEvents).toHaveLength(0)
   })
 
   test('toggleGroup adds/removes groups from enabledGroups', () => {
