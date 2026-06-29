@@ -517,4 +517,38 @@ Amy Holland,B,2,4,Lewis,`
     expect(amy.month).toBe(2)
     expect(amy.recurrence).toBeUndefined()
   })
+
+  it('writes the Deleted column header', () => {
+    const csv = exportEventsToCsv([
+      { id: '1', name: 'Amy', type: 'B', month: 2, day: 4, groups: ['Lewis'] },
+    ])
+
+    expect(csv).toContain('Name,Type,Month,Day,Groups,Recurrence,Deleted')
+  })
+
+  it('writes true for deleted events and blank for active ones', () => {
+    const csv = exportEventsToCsv([
+      { id: '1', name: 'Active One', type: 'B', month: 1, day: 1, groups: ['Lewis'] },
+      { id: '2', name: 'Deleted One', type: 'B', month: 1, day: 2, groups: ['Lewis'], deleted: true },
+    ])
+    // PapaParse emits CRLF line endings; split on /\r?\n/ so no trailing \r
+    // survives into the strings (the existing export tests sidestep this by using
+    // toContain — we want exact matches here, so we strip the \r at the split).
+    const lines = csv.trim().split(/\r?\n/)
+
+    expect(lines[1]).toBe('Active One,B,1,1,Lewis,,')
+    expect(lines[2]).toBe('Deleted One,B,1,2,Lewis,,true')
+  })
+
+  it('round-trips the deleted flag through export and re-parse', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
+Active One,B,1,1,Lewis,,
+Deleted One,B,1,2,Lewis,,true`
+
+    const { events } = parseEventsFromCsv(csv)
+    const reparsed = parseEventsFromCsv(exportEventsToCsv(events)).events
+
+    expect(reparsed.find((e) => e.name === 'Active One')!.deleted).toBeUndefined()
+    expect(reparsed.find((e) => e.name === 'Deleted One')!.deleted).toBe(true)
+  })
 })

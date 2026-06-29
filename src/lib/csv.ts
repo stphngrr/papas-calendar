@@ -153,10 +153,11 @@ export function exportEventsToCsv(events: CalendarEvent[]): string {
     Day: e.type === 'R' ? '' : e.day,
     Groups: e.groups.join(','),
     Recurrence: e.recurrence ? serializeRecurrenceRule(e.recurrence) : '',
+    Deleted: e.deleted ? 'true' : '',
   }))
 
   return Papa.unparse(rows, {
-    columns: ['Name', 'Type', 'Month', 'Day', 'Groups', 'Recurrence'],
+    columns: ['Name', 'Type', 'Month', 'Day', 'Groups', 'Recurrence', 'Deleted'],
   })
 }
 
