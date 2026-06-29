@@ -339,4 +339,28 @@ Gone,B,2,2,DeletedOnly,,true`
     expect(result.current.enabledGroups).toContain('Live')
     expect(result.current.enabledGroups).not.toContain('DeletedOnly')
   })
+
+  test('renameGroup also renames the group on deleted events', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.addEvent({ name: 'Trashed', type: 'B', month: 1, day: 1, groups: ['Work'] }))
+    const id = result.current.events[0].id
+    act(() => result.current.deleteEvent(id))
+
+    act(() => result.current.renameGroup('Work', 'Job'))
+
+    const ev = result.current.events.find((e) => e.id === id)!
+    expect(ev.groups).toEqual(['Job'])
+  })
+
+  test('deleteGroup also strips the group from deleted events', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.addEvent({ name: 'Trashed', type: 'B', month: 1, day: 1, groups: ['Work'] }))
+    const id = result.current.events[0].id
+    act(() => result.current.deleteEvent(id))
+
+    act(() => result.current.deleteGroup('Work'))
+
+    const ev = result.current.events.find((e) => e.id === id)!
+    expect(ev.groups).toEqual([])
+  })
 })
