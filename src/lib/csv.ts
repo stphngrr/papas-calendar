@@ -57,7 +57,17 @@ export function parseEventsFromCsv(csvString: string): CsvParseResult {
 
     const type = rawType as EventType
 
-    const deleted = (row.Deleted ?? '').trim().toLowerCase() === 'true'
+    const rawDeleted = (row.Deleted ?? '').trim()
+    const normalizedDeleted = rawDeleted.toLowerCase()
+    let deleted: boolean
+    if (normalizedDeleted === 'true') {
+      deleted = true
+    } else if (normalizedDeleted === '' || normalizedDeleted === 'false') {
+      deleted = false
+    } else {
+      errors.push(`Row ${rowNum}: invalid Deleted value "${rawDeleted}"`)
+      continue
+    }
 
     if (type === 'R') {
       const rawRecurrence = (row.Recurrence ?? '').trim()

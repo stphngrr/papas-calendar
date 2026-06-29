@@ -392,6 +392,30 @@ John,B,3,15,Friends,,true`
     expect(result.events[0].deleted).toBe(true)
     expect(result.events[0].groups).toEqual(['Family', 'Friends'])
   })
+
+  it('reports an error and skips a row with a garbage Deleted value', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
+Amy Holland,B,2,4,Lewis,,maybe`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(0)
+    expect(result.errors).toEqual(['Row 2: invalid Deleted value "maybe"'])
+  })
+
+  it('rejects truthy-looking but unsupported Deleted values like "1" and "yes"', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
+A,B,2,4,Lewis,,1
+C,B,2,5,Lewis,,yes`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(0)
+    expect(result.errors).toEqual([
+      'Row 2: invalid Deleted value "1"',
+      'Row 3: invalid Deleted value "yes"',
+    ])
+  })
 })
 
 describe('exportEventsToCsv', () => {
