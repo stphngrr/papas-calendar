@@ -98,3 +98,30 @@ test('recurring events appear on correct days in the preview', () => {
   // The event should appear in the event list
   expect(screen.getByText('CHURCH - 9 AM')).toBeInTheDocument()
 })
+
+test('deleting an event moves it to the Deleted section, and restore brings it back', () => {
+  render(<App />)
+  fireEvent.click(screen.getByRole('button', { name: 'Events' }))
+
+  // add an event
+  fireEvent.click(screen.getByRole('button', { name: /add event/i }))
+  fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Temp Person' } })
+  fireEvent.click(screen.getByRole('button', { name: /save event/i }))
+  expect(screen.getByText('Temp Person')).toBeInTheDocument()
+
+  // delete it (Delete -> Confirm)
+  fireEvent.click(screen.getByRole('button', { name: /^delete$/i }))
+  fireEvent.click(screen.getByRole('button', { name: /confirm/i }))
+
+  // gone from the active list
+  expect(screen.queryByText('Temp Person')).not.toBeInTheDocument()
+
+  // present in the Deleted section once expanded
+  fireEvent.click(screen.getByRole('button', { name: /deleted \(1\)/i }))
+  expect(screen.getByText('Temp Person')).toBeInTheDocument()
+
+  // restore it
+  fireEvent.click(screen.getByRole('button', { name: /restore/i }))
+  expect(screen.getByText('Temp Person')).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: /deleted \(/i })).not.toBeInTheDocument()
+})

@@ -5,6 +5,7 @@ import './App.css'
 import { useCalendarState } from './hooks/useCalendarState'
 import { CsvUpload } from './components/CsvUpload'
 import { EventList } from './components/EventList'
+import { DeletedEventList } from './components/DeletedEventList'
 import { EventForm } from './components/EventForm'
 import { MonthYearSelector } from './components/MonthYearSelector'
 import { GroupFilter } from './components/GroupFilter'
@@ -131,12 +132,16 @@ function App() {
               </section>
 
               <section className="panel-section">
-                <h2 className="section-label">Events ({state.events.length})</h2>
+                <h2 className="section-label">Events ({state.activeEvents.length})</h2>
                 <EventList
-                  events={state.events}
+                  events={state.activeEvents}
                   onUpdate={state.updateEvent}
                   onDelete={state.deleteEvent}
                   availableGroups={state.availableGroups}
+                />
+                <DeletedEventList
+                  events={state.deletedEvents}
+                  onRestore={state.restoreEvent}
                 />
               </section>
             </>
