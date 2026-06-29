@@ -320,6 +320,14 @@ form button[type="submit"]:hover {
   border-bottom: none;
 }
 
+.deleted-event {
+  opacity: 0.65;
+}
+
+.deleted-event span:first-child {
+  text-decoration: line-through;
+}
+
 .edit-date-row {
   display: flex;
   align-items: center;
