@@ -381,6 +381,20 @@ John,B,3,15,Family,,`
     expect(active).toHaveLength(1)
   })
 
+  it('keeps a deleted R row and an identical active R row as distinct events', () => {
+    const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
+CHURCH - 9 AM,R,,,Hooper,weekly:Sunday,true
+CHURCH - 9 AM,R,,,Hooper,weekly:Sunday,`
+
+    const result = parseEventsFromCsv(csv)
+
+    expect(result.events).toHaveLength(2)
+    const deleted = result.events.filter((e) => e.deleted)
+    const active = result.events.filter((e) => !e.deleted)
+    expect(deleted).toHaveLength(1)
+    expect(active).toHaveLength(1)
+  })
+
   it('merges groups of two matching deleted rows', () => {
     const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
 John,B,3,15,Family,,true
@@ -516,6 +530,32 @@ Amy Holland,B,2,4,Lewis,`
     expect(amy.type).toBe('B')
     expect(amy.month).toBe(2)
     expect(amy.recurrence).toBeUndefined()
+  })
+
+  it('round-trips a deleted R event with blank Month/Day and Deleted=true', () => {
+    const events: CalendarEvent[] = [
+      {
+        id: '1',
+        name: 'CHURCH - 9 AM',
+        type: 'R',
+        month: 0,
+        day: 0,
+        groups: ['Hooper'],
+        recurrence: { kind: 'weekly', dayOfWeek: 0 },
+        deleted: true,
+      },
+    ]
+
+    const exported = exportEventsToCsv(events)
+    const line = exported.trim().split(/\r?\n/)[1]
+    expect(line).toBe('CHURCH - 9 AM,R,,,Hooper,weekly:Sunday,true')
+
+    const reparsed = parseEventsFromCsv(exported).events
+    expect(reparsed).toHaveLength(1)
+    expect(reparsed[0].deleted).toBe(true)
+    expect(reparsed[0].month).toBe(0)
+    expect(reparsed[0].day).toBe(0)
+    expect(reparsed[0].recurrence).toEqual({ kind: 'weekly', dayOfWeek: 0 })
   })
 
   it('writes the Deleted column header', () => {
