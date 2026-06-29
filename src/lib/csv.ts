@@ -132,7 +132,7 @@ export function parseEventsFromCsv(csvString: string): CsvParseResult {
 }
 
 export function exportEventsToCsv(events: CalendarEvent[]): string {
-  const rows = events.map((e) => ({
+  const rows = [...events].sort(compareByDate).map((e) => ({
     Name: e.name,
     Type: e.type,
     Month: e.type === 'R' ? '' : e.month,
@@ -154,6 +154,16 @@ export function downloadCsv(csvString: string, filename: string): void {
   link.download = filename
   link.click()
   URL.revokeObjectURL(url)
+}
+
+// Recurring events have no calendar date, so they sort after all dated events.
+function compareByDate(a: CalendarEvent, b: CalendarEvent): number {
+  const aRecurring = a.type === 'R'
+  const bRecurring = b.type === 'R'
+  if (aRecurring !== bRecurring) return aRecurring ? 1 : -1
+  if (aRecurring && bRecurring) return 0
+  if (a.month !== b.month) return a.month - b.month
+  return a.day - b.day
 }
 
 function isValidType(type: string): type is EventType {

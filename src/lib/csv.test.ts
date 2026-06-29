@@ -363,13 +363,47 @@ Tootsie P,B,2,16,Lewis`
     const { events: reparsed } = parseEventsFromCsv(exported)
 
     expect(reparsed).toHaveLength(events.length)
-    for (let i = 0; i < events.length; i++) {
-      expect(reparsed[i].name).toBe(events[i].name)
-      expect(reparsed[i].type).toBe(events[i].type)
-      expect(reparsed[i].month).toBe(events[i].month)
-      expect(reparsed[i].day).toBe(events[i].day)
-      expect(reparsed[i].groups).toEqual(events[i].groups)
+    for (const event of events) {
+      const match = reparsed.find((e) => e.name === event.name)!
+      expect(match.type).toBe(event.type)
+      expect(match.month).toBe(event.month)
+      expect(match.day).toBe(event.day)
+      expect(match.groups).toEqual(event.groups)
     }
+  })
+
+  it('sorts dated events by month then day on export', () => {
+    const events: CalendarEvent[] = [
+      { id: '1', name: 'Sam Jones', type: 'A', month: 2, day: 19, groups: ['Lewis'] },
+      { id: '2', name: 'Amy Holland', type: 'B', month: 2, day: 4, groups: ['Lewis'] },
+      { id: '3', name: 'New Year Baby', type: 'B', month: 1, day: 1, groups: ['Lewis'] },
+    ]
+
+    const lines = exportEventsToCsv(events).trim().split('\n')
+
+    expect(lines[1]).toContain('New Year Baby')
+    expect(lines[2]).toContain('Amy Holland')
+    expect(lines[3]).toContain('Sam Jones')
+  })
+
+  it('places recurring events after dated events on export', () => {
+    const events: CalendarEvent[] = [
+      {
+        id: '1',
+        name: 'CHURCH',
+        type: 'R',
+        month: 0,
+        day: 0,
+        groups: ['Hooper'],
+        recurrence: { kind: 'weekly', dayOfWeek: 0 },
+      },
+      { id: '2', name: 'Amy Holland', type: 'B', month: 2, day: 4, groups: ['Lewis'] },
+    ]
+
+    const lines = exportEventsToCsv(events).trim().split('\n')
+
+    expect(lines[1]).toContain('Amy Holland')
+    expect(lines[2]).toContain('CHURCH')
   })
 
   it('round-trips R events through parse and export', () => {

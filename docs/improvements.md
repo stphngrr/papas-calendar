@@ -10,6 +10,7 @@
 - ~~Side pane is busy and events list can get very long — consider moving to another view~~
 - ~~Support filtering events list by group, month, and event type (in addition to existing name search)~~
 - ~~Show month dropdown as month names instead of number in Add Holiday~~
+- ~~Exported CSV appends newly added events to the end instead of inserting them by date~~
 - Improved styling
 
 ## From code audit
