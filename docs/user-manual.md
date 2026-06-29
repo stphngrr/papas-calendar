@@ -155,7 +155,11 @@ Click **Edit** on any event to change its name, date, groups, or other details. 
 
 **Deleting an event:**
 
-Click **Delete** on any event, then click **Confirm** to permanently remove it. Click **Cancel** if you change your mind.
+Click **Delete** on any event, then click **Confirm**. Click **Cancel** if you change your mind. Deleting no longer removes an event for good — it moves the event to the **Deleted** section just below the events list, and the event stops appearing on the calendar and PDF.
+
+**Restoring a deleted event:**
+
+Below the events list, a **Deleted (n)** heading appears whenever you have deleted events. Click it to expand the list, then click **Restore** next to any event to bring it back to the active list. A restored event returns to the calendar as long as its group is enabled. Deleted events are kept in your exported CSV (in the `Deleted` column) so they survive saving and reloading your file, but they never appear on the calendar or PDF until you restore them.
 
 ---
 
@@ -171,16 +175,18 @@ You can create your event list in any spreadsheet program (Excel, Google Sheets,
 | Day | Day of the month (1–31) | Yes for B/A, leave blank for R |
 | Groups | Group names, separated by commas | Optional |
 | Recurrence | Recurrence pattern (see below) | Required for R, leave blank for B/A |
+| Deleted | `true` for a deleted event, leave blank for active events | Optional |
 
 **Example rows:**
 
 ```
-Name,Type,Month,Day,Groups,Recurrence
-Alice Smith,B,3,15,Family,
-Bob & Carol Jones,A,6,20,"Family,Friends",
-CHURCH - 9 AM,R,,,Hooper,weekly:Sunday
-COMMUNION,R,,,Hooper,nth:1:Sunday
-BIBLE STUDY,R,,,Hooper,weekly:Tuesday
+Name,Type,Month,Day,Groups,Recurrence,Deleted
+Alice Smith,B,3,15,Family,,
+Bob & Carol Jones,A,6,20,"Family,Friends",,
+CHURCH - 9 AM,R,,,Hooper,weekly:Sunday,
+COMMUNION,R,,,Hooper,nth:1:Sunday,
+BIBLE STUDY,R,,,Hooper,weekly:Tuesday,
+Old Coworker,B,5,9,Work,,true
 ```
 
 **Recurrence patterns:**
