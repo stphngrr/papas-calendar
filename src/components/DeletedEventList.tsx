@@ -17,7 +17,15 @@ export function DeletedEventList({ events, onRestore }: DeletedEventListProps) {
 
   return (
     <div>
-      <button onClick={() => setExpanded((v) => !v)}>
+      <button
+        type="button"
+        className="deleted-toggle"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((v) => !v)}
+      >
+        <span className="deleted-toggle-caret" aria-hidden="true">
+          {expanded ? '▾' : '▸'}
+        </span>
         Deleted ({events.length})
       </button>
       {expanded && (

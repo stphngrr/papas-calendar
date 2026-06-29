@@ -19,6 +19,16 @@ test('shows a count badge of deleted events', () => {
   expect(screen.getByRole('button', { name: /deleted \(2\)/i })).toBeInTheDocument()
 })
 
+test('the Deleted header signals expandable state via aria-expanded', () => {
+  render(<DeletedEventList events={[deleted({ id: '1' })]} onRestore={() => {}} />)
+  const header = screen.getByRole('button', { name: /deleted \(1\)/i })
+  expect(header).toHaveAttribute('aria-expanded', 'false')
+
+  fireEvent.click(header)
+
+  expect(header).toHaveAttribute('aria-expanded', 'true')
+})
+
 test('reveals deleted events when expanded', () => {
   render(<DeletedEventList events={[deleted({ id: '1', name: 'Old Coworker' })]} onRestore={() => {}} />)
   // collapsed: the name is not shown yet
