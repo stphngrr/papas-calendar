@@ -34,6 +34,7 @@ export function useCalendarState() {
   const availableGroups = useMemo(() => {
     const groups = new Set<string>()
     for (const e of events) {
+      if (e.deleted) continue
       for (const g of e.groups) {
         groups.add(g)
       }
@@ -70,6 +71,7 @@ export function useCalendarState() {
     setCsvErrors(errors)
     const groups = new Set<string>()
     for (const e of parsed) {
+      if (e.deleted) continue
       for (const g of e.groups) {
         groups.add(g)
       }

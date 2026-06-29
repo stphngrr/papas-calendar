@@ -317,4 +317,26 @@ Valid Person,B,6,15,Family`
     act(() => result.current.toggleGroup('Hooper'))
     expect(result.current.filteredEvents.some(e => e.name === 'CHURCH - 9 AM')).toBe(false)
   })
+
+  test('availableGroups ignores groups that exist only on deleted events', () => {
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.addEvent({ name: 'Ghost', type: 'B', month: 1, day: 1, groups: ['DeletedOnly'] }))
+    const id = result.current.events[0].id
+
+    act(() => result.current.deleteEvent(id))
+
+    expect(result.current.availableGroups).not.toContain('DeletedOnly')
+  })
+
+  test('loadEventsFromCsv does not enable groups that exist only on deleted rows', () => {
+    const { result } = renderHook(() => useCalendarState())
+    const csv = `Name,Type,Month,Day,Groups,Recurrence,Deleted
+Active,B,1,1,Live,,
+Gone,B,2,2,DeletedOnly,,true`
+
+    act(() => result.current.loadEventsFromCsv(csv))
+
+    expect(result.current.enabledGroups).toContain('Live')
+    expect(result.current.enabledGroups).not.toContain('DeletedOnly')
+  })
 })
