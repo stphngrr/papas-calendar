@@ -128,6 +128,41 @@ Valid Person,B,6,15,Family`
     expect(result.current.deletedEvents).toHaveLength(0)
   })
 
+  test('restoreEvent merges into an identical active twin instead of duplicating', () => {
+    const { result } = renderHook(() => useCalendarState())
+    // active twin with one group
+    act(() => result.current.addEvent({ name: 'John', type: 'B', month: 3, day: 15, groups: ['Family'] }))
+    // a second John we will delete, carrying a different group
+    act(() => result.current.addEvent({ name: 'John', type: 'B', month: 3, day: 15, groups: ['Friends'] }))
+    const secondId = result.current.events[1].id
+    act(() => result.current.deleteEvent(secondId))
+
+    act(() => result.current.restoreEvent(secondId))
+
+    const johns = result.current.events.filter((e) => e.name === 'John')
+    expect(johns).toHaveLength(1)
+    expect(johns[0].deleted).toBeFalsy()
+    expect(johns[0].groups).toEqual(['Family', 'Friends'])
+  })
+
+  test('restoreEvent matches recurring twins by serialized recurrence', () => {
+    const church = {
+      name: 'CHURCH', type: 'R' as const, month: 0, day: 0,
+      recurrence: { kind: 'weekly' as const, dayOfWeek: 0 },
+    }
+    const { result } = renderHook(() => useCalendarState())
+    act(() => result.current.addEvent({ ...church, groups: ['Hooper'] }))
+    act(() => result.current.addEvent({ ...church, groups: ['Lewis'] }))
+    const secondId = result.current.events[1].id
+    act(() => result.current.deleteEvent(secondId))
+
+    act(() => result.current.restoreEvent(secondId))
+
+    const churches = result.current.events.filter((e) => e.name === 'CHURCH')
+    expect(churches).toHaveLength(1)
+    expect(churches[0].groups).toEqual(['Hooper', 'Lewis'])
+  })
+
   test('toggleGroup adds/removes groups from enabledGroups', () => {
     const { result } = renderHook(() => useCalendarState())
     act(() => result.current.loadEventsFromCsv(CSV_TWO_GROUPS))

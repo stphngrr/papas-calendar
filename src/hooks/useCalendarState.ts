@@ -5,6 +5,17 @@ import { useState, useMemo, useCallback } from 'react'
 import type { CalendarEvent, Holiday } from '../types'
 import { parseEventsFromCsv, compareByDate } from '../lib/csv'
 import { HOLIDAY_DEFINITIONS } from '../lib/holidays'
+import { serializeRecurrenceRule } from '../lib/recurrence'
+
+// Identity used to detect an active duplicate of a restored event.
+// Mirrors the CSV dedup: lower-cased name + date (or serialized recurrence for R).
+function eventIdentityKey(e: CalendarEvent): string {
+  const datePart =
+    e.type === 'R' && e.recurrence
+      ? serializeRecurrenceRule(e.recurrence)
+      : `${e.month}|${e.day}`
+  return `${e.name.toLowerCase()}|${e.type}|${datePart}`
+}
 
 export function useCalendarState() {
   const now = new Date()
@@ -86,9 +97,27 @@ export function useCalendarState() {
   }, [])
 
   const restoreEvent = useCallback((id: string) => {
-    setEvents((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, deleted: false } : e)),
-    )
+    setEvents((prev) => {
+      const target = prev.find((e) => e.id === id)
+      if (!target) return prev
+
+      const key = eventIdentityKey(target)
+      const twin = prev.find(
+        (e) => e.id !== id && !e.deleted && eventIdentityKey(e) === key,
+      )
+
+      if (!twin) {
+        return prev.map((e) => (e.id === id ? { ...e, deleted: false } : e))
+      }
+
+      const mergedGroups = [...twin.groups]
+      for (const g of target.groups) {
+        if (!mergedGroups.includes(g)) mergedGroups.push(g)
+      }
+      return prev
+        .filter((e) => e.id !== id)
+        .map((e) => (e.id === twin.id ? { ...e, groups: mergedGroups } : e))
+    })
   }, [])
 
   const setMonth = useCallback((month: number) => {
